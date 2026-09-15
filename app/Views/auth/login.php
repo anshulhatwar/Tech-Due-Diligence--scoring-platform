@@ -3,8 +3,8 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>ICTRD Tech Due-Diligence & Trust Score Platform</title>
-  <meta name="description" content="ICTRD Tech Due-Diligence & Trust Score Platform — Register, submit company profiles, upload documents, and receive ICTRD-verified assessment certification with QR-based verification.">
+  <title>CREDENCE Tech Due-Diligence & Trust Score Platform</title>
+  <meta name="description" content="CREDENCE Tech Due-Diligence & Trust Score Platform — Register, submit company profiles, upload documents, and receive CREDENCE-verified assessment certification with QR-based verification.">
   
   <!-- Modern Font Stack -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -12,7 +12,7 @@
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Outfit:wght@500;600;700;800&display=swap" rel="stylesheet">
   
   <!-- Design System & Styles -->
-  <link rel="stylesheet" href="css/style.css">
+  <link rel="stylesheet" href="<?= base_url('css/style.css') ?>">
 </head>
 <body>
 
@@ -24,7 +24,7 @@
       
       <!-- Brand -->
       <div class="auth-brand">
-        <div class="auth-brand-badge">ICTRD</div>
+       <img src="<?= base_url('images/logo.png') ?>" alt="Credence" style="height:90px;">
         <h1>Tech Due-Diligence & Trust Score</h1>
         <p>Verification & Assessment Platform</p>
       </div>
@@ -129,7 +129,7 @@
     <!-- Header & Top Navigation Bar -->
     <header class="navbar">
       <a href="#" class="brand-logo">
-        <div class="brand-badge">ICTRD</div>
+        <div class="brand-badge">CREDENCE</div>
         <div>
           <div class="brand-title">Tech Due-Diligence & Trust Score</div>
           <span class="brand-sub">Verification & Assessment Platform</span>
@@ -194,7 +194,7 @@
 
         <!-- ADMIN LINKS -->
         <div class="role-nav role-admin" style="display:none;">
-          <div class="sidebar-title">ICTRD Admin</div>
+          <div class="sidebar-title">CREDENCE Admin</div>
           <a class="nav-link" data-view="admin-dashboard">
             <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path></svg>
             Applications Overview
@@ -245,7 +245,7 @@
             <div style="display:flex; justify-content:space-between; align-items:center;">
               <div>
                 <h1 class="page-title" id="st-comp-name">My Company</h1>
-                <p class="page-desc">ICTRD Assessment Portal & Application Status Tracker</p>
+                <p class="page-desc">CREDENCE Assessment Portal & Application Status Tracker</p>
               </div>
               <span class="badge badge-new" id="st-app-status-badge">Registered</span>
             </div>
@@ -282,7 +282,7 @@
               </div>
               <div class="wizard-step-8 locked" data-step="7">
                 <div class="step-8-circle">7</div>
-                <div class="step-8-label">ICTRD Review</div>
+                <div class="step-8-label">CREDENCE Review</div>
               </div>
               <div class="wizard-step-8 locked" data-step="8">
                 <div class="step-8-circle">8</div>
@@ -296,7 +296,7 @@
             <div class="card-header">
               <h3 class="card-title" style="color:var(--primary);">
                 <svg width="22" height="22" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"></path></svg>
-                ICTRD Assessment Result & Verification Active
+                CREDENCE Assessment Result & Verification Active
               </h3>
               <div>
                 <button class="btn btn-secondary btn-sm" onclick="AppStore.exportPDFReport()">Download PDF Report</button>
@@ -361,7 +361,7 @@
         <section id="startup-profile" class="view-section">
           <div class="page-header">
             <h1 class="page-title">Company & Tech Profile</h1>
-            <p class="page-desc">Complete your business, technology, and IP details for ICTRD Due-Diligence evaluation</p>
+            <p class="page-desc">Complete your business, technology, and IP details for CREDENCE Due-Diligence evaluation</p>
           </div>
 
           <!-- Step completion banner (shown after profile is saved) -->
@@ -494,7 +494,7 @@
         <section id="startup-docs" class="view-section">
           <div class="page-header">
             <h1 class="page-title">Document Manager</h1>
-            <p class="page-desc">Upload required verification documents for ICTRD assessment</p>
+            <p class="page-desc">Upload required verification documents for CREDENCE assessment</p>
           </div>
 
           <div class="step-complete-banner" id="docs-complete-banner" style="display:none;">
@@ -555,8 +555,8 @@
         <!-- ==================== 4. APPLY & PAYMENT ==================== -->
         <section id="startup-apply" class="view-section">
           <div class="page-header">
-            <h1 class="page-title">Apply for ICTRD Assessment</h1>
-            <p class="page-desc">Submit your company for official ICTRD Tech Due-Diligence & Verification Certification</p>
+            <h1 class="page-title">Apply for CREDENCE Assessment</h1>
+            <p class="page-desc">Submit your company for official CREDENCE Tech Due-Diligence & Verification Certification</p>
           </div>
 
           <!-- Already Applied Banner -->
@@ -564,7 +564,7 @@
             <div class="icon">✅</div>
             <div>
               <div class="text">Application Submitted & Payment Complete!</div>
-              <div class="sub">Your application is now under ICTRD review. An evaluator will be assigned shortly.</div>
+              <div class="sub">Your application is now under CREDENCE review. An evaluator will be assigned shortly.</div>
             </div>
           </div>
 
@@ -573,8 +573,8 @@
               <h3 class="card-title">Assessment Application Tier</h3>
             </div>
             <div style="background:#eff6ff; border:1px solid #bfdbfe; border-radius:var(--radius-md); padding:1.25rem; margin-bottom:1.5rem;">
-              <h4 style="font-family:'Outfit',sans-serif; font-size:1.3rem; color:var(--primary); margin-bottom:4px;">Full ICTRD Tech Due-Diligence & Trust Score Assessment</h4>
-              <p style="font-size:0.92rem; color:#334155;">Includes 9-parameter expert evaluator assessment, dynamic score report, unique Verification ID issuance, QR code digital badge, and listing in the public ICTRD Verified Directory.</p>
+              <h4 style="font-family:'Outfit',sans-serif; font-size:1.3rem; color:var(--primary); margin-bottom:4px;">Full CREDENCE Tech Due-Diligence & Trust Score Assessment</h4>
+              <p style="font-size:0.92rem; color:#334155;">Includes 9-parameter expert evaluator assessment, dynamic score report, unique Verification ID issuance, QR code digital badge, and listing in the public CREDENCE Verified Directory.</p>
               <div style="margin-top:12px; font-family:'Outfit',sans-serif; font-size:1.6rem; font-weight:800; color:#0f172a;">
                 Assessment Fee: ₹4,999 <small style="font-size:0.85rem; color:#64748b; font-weight:normal;">+ GST</small>
               </div>
@@ -587,7 +587,7 @@
         <!-- ==================== 5. ADMIN DASHBOARD ==================== -->
         <section id="admin-dashboard" class="view-section">
           <div class="page-header">
-            <h1 class="page-title">ICTRD Admin Dashboard</h1>
+            <h1 class="page-title">CREDENCE Admin Dashboard</h1>
             <p class="page-desc">Manage startup assessment applications, evaluator assignments, and certificates</p>
           </div>
 
@@ -657,7 +657,7 @@
         <section id="admin-params" class="view-section">
           <div class="page-header">
             <h1 class="page-title">Assessment Parameter & Weight Configurator</h1>
-            <p class="page-desc">Define and configure weightage for ICTRD Tech Due-Diligence evaluation parameters</p>
+            <p class="page-desc">Define and configure weightage for CREDENCE Tech Due-Diligence evaluation parameters</p>
           </div>
 
           <div class="card">
@@ -720,14 +720,14 @@
         <!-- ==================== 8. PUBLIC SEARCH ==================== -->
         <section id="public-search" class="view-section">
           <div class="page-header">
-            <h1 class="page-title">ICTRD Public Verification</h1>
-            <p class="page-desc">Verify authenticity of ICTRD Assessment Certificates and Verification IDs</p>
+            <h1 class="page-title">CREDENCE Public Verification</h1>
+            <p class="page-desc">Verify authenticity of CREDENCE Assessment Certificates and Verification IDs</p>
           </div>
 
           <div class="card" style="text-align:center; padding:2.5rem 1.5rem;">
-            <h2 style="font-family:'Outfit',sans-serif; font-size:1.6rem; margin-bottom:1rem;">Enter ICTRD Verification ID</h2>
+            <h2 style="font-family:'Outfit',sans-serif; font-size:1.6rem; margin-bottom:1rem;">Enter CREDENCE Verification ID</h2>
             <div style="max-width:550px; margin:0 auto; display:flex; gap:10px;">
-              <input type="text" id="public-search-input" class="form-control" placeholder="e.g. ICTRD-TD-2026-00125 or company name">
+              <input type="text" id="public-search-input" class="form-control" placeholder="e.g. CREDENCE-TD-2026-00125 or company name">
               <button class="btn btn-primary" id="btn-public-search">Verify Now</button>
             </div>
           </div>
@@ -736,7 +736,7 @@
           <div id="public-result-card" style="display:none;">
             <div class="certificate-frame">
               <div class="cert-header">
-                <div class="cert-ictrd-logo">ICTRD</div>
+                <div class="cert-CREDENCE-logo">CREDENCE</div>
                 <div class="cert-subtitle">Official Tech Due-Diligence & Verification Certificate</div>
               </div>
 
@@ -745,7 +745,7 @@
                 <div class="cert-company-name" id="pub-cert-comp-name">--</div>
                 <p id="pub-cert-industry" style="color:#64748b; font-weight:500;">--</p>
 
-                <p style="margin-top:1.25rem; color:#334155;">has successfully undergone ICTRD Technology & Business Model Assessment</p>
+                <p style="margin-top:1.25rem; color:#334155;">has successfully undergone CREDENCE Technology & Business Model Assessment</p>
                 <div class="cert-score-pill">Assessment Score: <span id="pub-cert-score">--</span></div>
               </div>
 
@@ -777,7 +777,7 @@
 
           <!-- Not Found -->
           <div id="public-notfound-card" class="card" style="display:none; text-align:center; padding:2rem;">
-            <h3 style="color:var(--danger);">No Active ICTRD Verification Found</h3>
+            <h3 style="color:var(--danger);">No Active CREDENCE Verification Found</h3>
             <p style="color:#64748b;">The requested Verification ID was not found or has been revoked.</p>
           </div>
         </section>
@@ -785,8 +785,8 @@
         <!-- ==================== 9. PUBLIC DIRECTORY ==================== -->
         <section id="public-directory" class="view-section">
           <div class="page-header">
-            <h1 class="page-title">ICTRD Verified Company Directory</h1>
-            <p class="page-desc">Discover and verify technology companies assessed and certified by ICTRD</p>
+            <h1 class="page-title">CREDENCE Verified Company Directory</h1>
+            <p class="page-desc">Discover and verify technology companies assessed and certified by CREDENCE</p>
           </div>
 
           <div class="filter-bar">
@@ -827,7 +827,7 @@
             <div class="empty-state" id="dir-empty-state" style="display:none;">
               <div class="empty-state-icon">🔍</div>
               <h3>No Verified Companies Found</h3>
-              <p>Verified companies will appear here once ICTRD certifies them.</p>
+              <p>Verified companies will appear here once CREDENCE certifies them.</p>
             </div>
           </div>
         </section>
@@ -846,7 +846,7 @@
         <button class="modal-close" onclick="AppStore.closeModals()">&times;</button>
       </div>
       <div style="text-align:center; padding:1rem 0;">
-        <div style="font-size:1rem; font-weight:700; color:#334155;">ICTRD Tech Assessment Fee</div>
+        <div style="font-size:1rem; font-weight:700; color:#334155;">CREDENCE Tech Assessment Fee</div>
         <div style="font-family:'Outfit',sans-serif; font-size:2.2rem; font-weight:800; color:var(--primary); margin:8px 0;">₹4,999.00</div>
         <p style="font-size:0.85rem; color:#64748b; margin-bottom:1.5rem;">Simulated Razorpay Gateway Integration</p>
         <button class="btn btn-primary" id="btn-confirm-razorpay" style="width:100%;">Complete Test Payment</button>
@@ -863,7 +863,7 @@
       </div>
       <input type="hidden" id="assign-startup-id">
       <div class="form-group">
-        <label class="form-label">Select Qualified ICTRD Evaluator</label>
+        <label class="form-label">Select Qualified CREDENCE Evaluator</label>
         <select id="assign-evaluator-select" class="form-select"></select>
       </div>
       <div style="display:flex; justify-content:flex-end; gap:10px;">
@@ -885,7 +885,7 @@
         <strong>Evaluator Score:</strong> <span id="issue-eval-score" class="text-primary"></span>
       </p>
       <div class="form-group">
-        <label class="form-label">ICTRD Verification ID</label>
+        <label class="form-label">CREDENCE Verification ID</label>
         <input type="text" id="issue-ver-id-input" class="form-control">
       </div>
       <div style="display:flex; justify-content:flex-end; gap:10px;">
