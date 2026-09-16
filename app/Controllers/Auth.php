@@ -13,4 +13,9 @@ class Auth extends BaseController
     {
         return view('dashboard/startup');
     }
+
+    public function profile()
+    {
+        return view('dashboard/profile');
+    }
 }
