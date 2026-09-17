@@ -18,4 +18,8 @@ class Auth extends BaseController
     {
         return view('dashboard/profile');
     }
+    public function documents()
+    {
+        return view('dashboard/documents');
+    }
 }
