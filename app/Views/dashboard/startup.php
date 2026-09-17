@@ -86,6 +86,36 @@
               <span class="badge badge-new" id="st-app-status-badge">Registered</span>
             </div>
           </div>
+          <div class="metrics-grid">
+  <div class="metric-card">
+    <div class="metric-icon">📊</div>
+    <div>
+      <div class="metric-val">25%</div>
+      <div class="metric-label">Profile Completion</div>
+    </div>
+  </div>
+  <div class="metric-card">
+    <div class="metric-icon">📄</div>
+    <div>
+      <div class="metric-val">0/3</div>
+      <div class="metric-label">Documents Uploaded</div>
+    </div>
+  </div>
+  <div class="metric-card">
+    <div class="metric-icon">⏱️</div>
+    <div>
+      <div class="metric-val">Step 2/8</div>
+      <div class="metric-label">Workflow Stage</div>
+    </div>
+  </div>
+  <div class="metric-card">
+    <div class="metric-icon">🛡️</div>
+    <div>
+      <div class="metric-val">Pending</div>
+      <div class="metric-label">Verification Status</div>
+    </div>
+  </div>
+</div>
 
           <!-- 8-Step Wizard Progress -->
           <div class="workflow-wizard">
