@@ -154,4 +154,21 @@ class AuthController extends BaseController
             ]
         ]);
     }
+
+
+    // =========================
+    // LOGOUT API
+    // =========================
+    public function logout()
+    {
+        $session = session();
+
+        // Destroy current user session
+        $session->destroy();
+
+        return $this->response->setJSON([
+            'status' => true,
+            'message' => 'Logout successful'
+        ]);
+    }
 }
