@@ -41,7 +41,11 @@
 html, body {
   margin: 0;
   padding: 0;
-  background: var(--paper);
+  background-image: url('../images/dashboard.jpg');
+  background-size: cover;
+  background-position: center;
+  background-attachment: fixed;
+  background-repeat: no-repeat;
   color: var(--ink);
   font-family: var(--font-body);
   font-size: 15px;
@@ -76,7 +80,7 @@ code {
   display: flex;
   align-items: center;
   justify-content: center;
-  background-image: url('../images/background.png');
+  background-image: url('../images/loginn.PNG');
   background-size: cover;
   background-position: center;
   background-repeat: no-repeat;
