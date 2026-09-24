@@ -141,19 +141,51 @@
     .contact-desc { color: var(--ink-soft); font-size: 0.9rem; margin-bottom: 1.5rem; }
     .contact-info-item { display: flex; align-items: center; gap: 10px; margin-bottom: 1rem; font-size: 0.9rem; color: var(--ink); }
 
-    .home-footer {
-      background: var(--navy-900); color: rgba(255,255,255,0.6);
-      padding: 2.5rem; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 1rem;
-    }
-    .home-footer-brand { display: flex; align-items: center; gap: 10px; color: #fff; font-weight: 700; }
-    .home-footer-links { display: flex; gap: 1.5rem; font-size: 0.85rem; }
-    .home-footer-links a { color: rgba(255,255,255,0.6); }
-    .home-footer-links a:hover { color: #fff; }
+  .home-footer { background: var(--navy-900); color: #fff; padding: 1.5rem; display: flex; align-items: center; justify-content: center; text-align: center; }
 
     @media (max-width: 900px) {
       .hero-grid, .about-grid, .register-band, .contact-section { grid-template-columns: 1fr; }
       .home-nav-links { display: none; }
     }
+    .reveal {
+  opacity: 0;
+  transform: translateY(60px);
+  transition: opacity 0.8s ease, transform 0.8s ease;
+}
+.reveal.active {
+  opacity: 1;
+  transform: translateY(0);
+}
+.hero-section { position: relative; overflow: hidden; }
+
+.hero-slideshow { position: absolute; inset: 0; z-index: 0; }
+.hero-slideshow div {
+  position: absolute;
+  inset: 0;
+  background-size: cover;
+  background-position: center;
+  opacity: 0;
+  animation: heroFade 15s infinite;
+}
+.hero-slideshow div:nth-child(1) { animation-delay: 0s; }
+.hero-slideshow div:nth-child(2) { animation-delay: 5s; }
+.hero-slideshow div:nth-child(3) { animation-delay: 10s; }
+
+@keyframes heroFade {
+  0%   { opacity: 0; }
+  5%   { opacity: 1; }
+  28%  { opacity: 1; }
+  33%  { opacity: 0; }
+  100% { opacity: 0; }
+}
+
+.hero-overlay {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(135deg, rgba(10,20,40,0.75), rgba(10,20,40,0.55));
+  z-index: 1;
+}
+.hero-grid { position: relative; z-index: 2; }
   </style>
 </head>
 <body>
@@ -161,7 +193,7 @@
   <!-- ============ NAVBAR ============ -->
   <header class="home-navbar">
     <a href="<?= base_url('/') ?>" class="brand-logo" style="display:flex; align-items:center; gap:10px;">
-      <img src="<?= base_url('images/logo.png') ?>" alt="Credence" style="height:64px;">
+      <img src="<?= base_url('images/logo.png') ?>" alt="Credence" style="height:80px;">
     </a>
     <nav class="home-nav-links">
       <a href="#" class="active">Home</a>
@@ -175,6 +207,12 @@
 
   <!-- ============ HERO ============ -->
   <section class="hero-section">
+    <div class="hero-slideshow">
+  <div style="background-image: url('<?= base_url('images/hero-bg.jpg') ?>')"></div>
+  <div style="background-image: url('<?= base_url('images/hero-bg2.jpg') ?>')"></div>
+  <div style="background-image: url('<?= base_url('images/hero-bg3.jpg') ?>')"></div>
+</div>
+<div class="hero-overlay"></div>
     <div class="hero-grid">
       <div>
         <div class="hero-eyebrow">Tech Due-Diligence & Trust Score Platform</div>
@@ -218,7 +256,7 @@
   </section>
 
   <!-- ============ ABOUT ============ -->
-  <section class="section" id="about">
+  <section class="section reveal" id="about">
     <div class="about-grid">
       <div class="about-copy">
         <div class="section-eyebrow">About Credence</div>
@@ -265,7 +303,7 @@
   </section>
 
   <!-- ============ SERVICES ============ -->
-  <section class="section services-section" id="services">
+  <section class="section services-section reveal" id="services">
     <div class="section-eyebrow">Our Services</div>
     <h2 class="section-title">Comprehensive Due-Diligence <span>Solutions</span></h2>
 
@@ -299,7 +337,7 @@
   </section>
 
   <!-- ============ REGISTER CTA ============ -->
-  <section class="register-band">
+  <section class="register-band reveal">
     <div class="register-mock">
       <div class="register-mock-title">Start Verifying Today.</div>
       <div class="register-mock-bar" style="width:70%;"></div>
@@ -321,16 +359,16 @@
   </section>
 
   <!-- ============ CONTACT ============ -->
-  <section class="contact-section" id="contact">
+  <section class="contact-section reveal" id="contact">
     <div>
       <div class="contact-eyebrow">Contact Us</div>
       <h2 class="contact-title">Let's Build a <br>More <span>Transparent</span> Future.</h2>
       <p class="contact-desc">Have questions or need support? We'd love to hear from you. Reach out to our team and we'll get back to you soon.</p>
 
       <div class="contact-info-item">✉️ support@credence.com</div>
-      <div class="contact-info-item">📞 +91 98765 43210</div>
+      <div class="contact-info-item">📞 +91 93032 40326</div>
       <div class="contact-info-item">📍 Nagpur, India</div>
-      <div class="contact-info-item">🕒 Mon - Sat, 9:00 AM - 6:00 PM</div>
+      <div class="contact-info-item">🕒 Mon - Fri, 9:00 AM - 6:00 PM</div>
     </div>
 
     <form class="auth-form">
@@ -348,21 +386,53 @@
   </section>
 
   <!-- ============ FOOTER ============ -->
-  <footer class="home-footer">
-    <div class="home-footer-brand">
-      <img src="<?= base_url('images/logo.png') ?>" alt="Credence" style="height:26px; background:#fff; padding:3px 6px; border-radius:6px;">
-      <span>Credence</span>
-      <span style="font-weight:400; color:rgba(255,255,255,0.4); font-size:0.8rem; margin-left:8px;">Know · Verify · Trust</span>
-    </div>
-    <div class="home-footer-links">
-      <a href="#">Home</a>
-      <a href="#about">About</a>
-      <a href="#services">Services</a>
-      <a href="<?= base_url('login') ?>">Register</a>
-      <a href="#contact">Contact Us</a>
-    </div>
-    <div style="font-size:0.8rem;">© 2026 Credence. All rights reserved.</div>
-  </footer>
+<footer class="home-footer">
+  <div class="footer-copyright">© 2026 Credence. All rights reserved.</div>
+</footer>
+<script>
+  const navLinks = document.querySelectorAll('.home-nav-links a');
+  const sections = ['about', 'services', 'contact'];
+
+  window.addEventListener('scroll', () => {
+    let current = '';
+
+    // Agar user bottom tak scroll kar chuka hai, to Contact ko force active karo
+    if (window.innerHeight + window.scrollY >= document.body.scrollHeight - 5) {
+      current = 'contact';
+    } else {
+      sections.forEach(id => {
+        const el = document.getElementById(id);
+        if (el) {
+          const rect = el.getBoundingClientRect();
+          if (rect.top <= 120 && rect.bottom >= 120) {
+            current = id;
+          }
+        }
+      });
+    }
+
+    navLinks.forEach(link => {
+      link.classList.remove('active');
+      if (link.getAttribute('href') === '#' + current) {
+        link.classList.add('active');
+      }
+      if (!current && link.getAttribute('href') === '#') {
+        link.classList.add('active');
+      }
+    });
+  });
+  const revealEls = document.querySelectorAll('.reveal');
+const observer = new IntersectionObserver((entries) => {
+  entries.forEach(entry => {
+    if (entry.isIntersecting) {
+      entry.target.classList.add('active');
+    }
+  });
+}, { threshold: 0.15 });
+
+revealEls.forEach(el => observer.observe(el));
+
+</script>
 
 </body>
 </html>
