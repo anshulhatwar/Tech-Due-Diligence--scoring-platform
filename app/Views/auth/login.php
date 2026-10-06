@@ -104,6 +104,7 @@
             <div class="form-group">
               <label class="form-label">Password</label>
               <input type="password" class="form-control" name="password" id="login-password" placeholder="Enter password" required>
+              <a href="#" style="font-size:0.85rem; color:var(--primary); display:block; text-align:right; margin-top:4px;" id="forgot-password-link">Forgot Password?</a>
             </div>
 
             <button type="submit" class="auth-submit-btn" id="btn-login">
@@ -955,12 +956,14 @@
     </div>
   </div>
 
-  <!-- Vendor JS Libraries -->
-  <script src="js/qrcode.min.js"></script>
+ <!-- Vendor JS Libraries (abhi files nahi hain, isliye disabled) -->
+  <!-- <script src="js/qrcode.min.js"></script>
   <script src="js/chart-custom.js"></script>
-  <script src="js/app.js"></script>
+  <script src="js/app.js"></script> -->
+
   <script>
-document.getElementById('register-form').addEventListener('submit', async function (e) {
+    // ============ REGISTER ============
+   document.getElementById('register-form').addEventListener('submit', async function (e) {
   e.preventDefault();
   const form = this;
 
@@ -985,14 +988,65 @@ document.getElementById('register-form').addEventListener('submit', async functi
     const result = await res.json();
 
     if (result.status) {
+      alert('Registration successful! Please login to continue.');
       window.location.href = '<?= base_url('login') ?>';
     } else {
-      alert(Object.values(result.errors || { message: result.message }).join('\n'));
+      if (result.errors && result.errors.Email) {
+        alert('This email is already registered. Please login instead.');
+      } else {
+        alert(Object.values(result.errors || { message: result.message }).join('\n'));
+      }
     }
   } catch (err) {
     alert('Server error, dobara try karo');
   }
 });
-</script>
+
+    // ============ LOGIN ============
+    document.getElementById('login-form').addEventListener('submit', async function (e) {
+  e.preventDefault();
+  const form = this;
+
+  const payload = new URLSearchParams();
+  payload.append('Email', form.email.value);
+  payload.append('Password', form.password.value);
+
+  try {
+    const res = await fetch('<?= base_url('api/login') ?>', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+      body: payload
+    });
+    const result = await res.json();
+
+    if (result.status) {
+      window.location.href = '<?= base_url('dashboard') ?>';
+    } else {
+      alert(result.message || 'Login failed');
+    }
+  } catch (err) {
+    alert('Server error, dobara try karo');
+  }
+});
+
+    // ============ TAB SWITCH ============
+    document.getElementById('tab-login-btn').addEventListener('click', function() {
+      document.getElementById('tab-register-btn').classList.remove('active');
+      this.classList.add('active');
+      document.getElementById('panel-register').classList.remove('active');
+      document.getElementById('panel-login').classList.add('active');
+    });
+
+    document.getElementById('tab-register-btn').addEventListener('click', function() {
+      document.getElementById('tab-login-btn').classList.remove('active');
+      this.classList.add('active');
+      document.getElementById('panel-login').classList.remove('active');
+      document.getElementById('panel-register').classList.add('active');
+      document.getElementById('forgot-password-link').addEventListener('click', function(e) {
+  e.preventDefault();
+  alert('Password reset feature coming soon. Please contact support.');
+});
+    });
+  </script>
 </body>
 </html>
