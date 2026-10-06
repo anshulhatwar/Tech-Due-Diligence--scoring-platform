@@ -952,8 +952,8 @@
   </div>
 
   <!-- Vendor JS Libraries -->
-  <script src="js/qrcode.min.js"></script>
+  <!-- <script src="js/qrcode.min.js"></script>
   <script src="js/chart-custom.js"></script>
-  <script src="js/app.js"></script>
+  <script src="js/app.js"></script> -->
 </body>
 </html>
