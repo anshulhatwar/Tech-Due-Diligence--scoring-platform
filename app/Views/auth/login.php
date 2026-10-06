@@ -956,7 +956,7 @@
   </div>
 
   <!-- Vendor JS Libraries -->
-  <script src="js/qrcode.min.js"></script>
+  <!-- <script src="js/qrcode.min.js"></script>
   <script src="js/chart-custom.js"></script>
   <script src="js/app.js"></script>
   <script>
@@ -994,5 +994,6 @@ document.getElementById('register-form').addEventListener('submit', async functi
   }
 });
 </script>
+  <script src="js/app.js"></script> -->
 </body>
 </html>
