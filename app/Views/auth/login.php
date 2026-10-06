@@ -75,6 +75,10 @@
                 <input type="password" class="form-control" name="confirmPassword" id="reg-confirm-password" placeholder="Re-enter password" required>
               </div>
             </div>
+            <div class="form-group">
+  <label class="form-label">Address <span class="req">*</span></label>
+  <input type="text" class="form-control" name="address" id="reg-address" placeholder="Company address" required>
+</div>
 
             <button type="submit" class="auth-submit-btn" id="btn-register">
               <svg width="18" height="18" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z"></path></svg>
@@ -955,5 +959,40 @@
   <script src="js/qrcode.min.js"></script>
   <script src="js/chart-custom.js"></script>
   <script src="js/app.js"></script>
+  <script>
+document.getElementById('register-form').addEventListener('submit', async function (e) {
+  e.preventDefault();
+  const form = this;
+
+  if (form.password.value !== form.confirmPassword.value) {
+    alert('Passwords match nahi kar rahe');
+    return;
+  }
+
+  const payload = new URLSearchParams();
+  payload.append('Name', form.founderName.value);
+  payload.append('Email', form.email.value);
+  payload.append('Password', form.password.value);
+  payload.append('Phone', form.contactPhone.value);
+  payload.append('Address', form.address.value);
+
+  try {
+    const res = await fetch('<?= base_url('api/register') ?>', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+      body: payload
+    });
+    const result = await res.json();
+
+    if (result.status) {
+      window.location.href = '<?= base_url('login') ?>';
+    } else {
+      alert(Object.values(result.errors || { message: result.message }).join('\n'));
+    }
+  } catch (err) {
+    alert('Server error, dobara try karo');
+  }
+});
+</script>
 </body>
 </html>
