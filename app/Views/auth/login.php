@@ -1028,7 +1028,215 @@
     alert('Server error, dobara try karo');
   }
 });
+// ============ COMPANY PROFILE ============
 
+document.getElementById('startup-profile-form').addEventListener('submit', async function (e) {
+    e.preventDefault();
+
+    const form = this;
+
+    const payload = new URLSearchParams();
+
+    // =========================
+    // BASIC INFORMATION
+    // =========================
+
+    payload.append('name', form.companyName.value);
+    payload.append('founder_details', form.founderDetails.value);
+    payload.append('contact_email', form.contactEmail.value);
+    payload.append('contact_phone', form.contactPhone.value);
+    payload.append('website', form.website.value);
+    payload.append('location', form.location.value);
+    payload.append('industry', form.industry.value);
+    payload.append('stage', 'Startup');
+    payload.append('year_established', form.yearEstablished.value);
+    payload.append('team_size', form.teamSize.value);
+    payload.append('company_description', form.companyDescription.value);
+
+
+    // =========================
+    // BUSINESS INFORMATION
+    // =========================
+
+    payload.append('problem_statement', form.problemStatement.value);
+    payload.append('product_service', form.productService.value);
+    payload.append('business_model', form.businessModel.value);
+    payload.append('usp', form.usp.value);
+
+
+    // =========================
+    // TECHNOLOGY & IP
+    // =========================
+
+    payload.append('technology_used', form.technologyUsed.value);
+    payload.append('intellectual_property', form.intellectualProperty.value);
+
+
+    try {
+
+        // =========================
+        // CHECK EXISTING PROFILE
+        // =========================
+
+        const checkResponse = await fetch(
+            '<?= base_url('api/company') ?>',
+            {
+                method: 'GET',
+                credentials: 'same-origin'
+            }
+        );
+
+
+        let response;
+
+
+        // =========================
+        // PROFILE EXISTS → UPDATE
+        // =========================
+
+        if (checkResponse.ok) {
+
+            response = await fetch(
+                '<?= base_url('api/company') ?>',
+                {
+                    method: 'PUT',
+
+                    headers: {
+                        'Content-Type': 'application/x-www-form-urlencoded'
+                    },
+
+                    credentials: 'same-origin',
+
+                    body: payload
+                }
+            );
+
+        }
+
+
+        // =========================
+        // PROFILE DOES NOT EXIST → CREATE
+        // =========================
+
+        else if (checkResponse.status === 404) {
+
+            response = await fetch(
+                '<?= base_url('api/company') ?>',
+                {
+                    method: 'POST',
+
+                    headers: {
+                        'Content-Type': 'application/x-www-form-urlencoded'
+                    },
+
+                    credentials: 'same-origin',
+
+                    body: payload
+                }
+            );
+
+        }
+
+
+        // =========================
+        // LOGIN / SESSION PROBLEM
+        // =========================
+
+        else {
+
+            alert(
+                'Company profile check failed. Please login again.'
+            );
+
+            return;
+        }
+
+
+        // =========================
+        // READ SERVER RESPONSE
+        // =========================
+
+        const result = await response.json();
+
+        console.log(
+            'Company Profile Response:',
+            result
+        );
+
+
+        // =========================
+        // SUCCESS
+        // =========================
+
+        if (result.status) {
+
+            alert(
+                result.message ||
+                'Company profile saved successfully!'
+            );
+
+
+            // Profile completion banner
+            const banner =
+                document.getElementById(
+                    'profile-complete-banner'
+                );
+
+
+            if (banner) {
+
+                banner.style.display = 'flex';
+
+                banner.scrollIntoView({
+                    behavior: 'smooth',
+                    block: 'center'
+                });
+            }
+
+        }
+
+
+        // =========================
+        // VALIDATION / SERVER ERROR
+        // =========================
+
+        else {
+
+            if (result.errors) {
+
+                alert(
+                    Object.values(result.errors).join('\n')
+                );
+
+            } else {
+
+                alert(
+                    result.message ||
+                    'Company profile save failed.'
+                );
+            }
+        }
+
+    }
+
+
+    // =========================
+    // NETWORK / JAVASCRIPT ERROR
+    // =========================
+
+    catch (error) {
+
+        console.error(
+            'Company Profile Error:',
+            error
+        );
+
+        alert(
+            'Server error. Please try again.'
+        );
+    }
+
+});
     // ============ TAB SWITCH ============
     document.getElementById('tab-login-btn').addEventListener('click', function() {
       document.getElementById('tab-register-btn').classList.remove('active');
