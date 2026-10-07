@@ -15,9 +15,12 @@
   <link rel="stylesheet" href="<?= base_url('css/style.css') ?>">
 </head>
 <body>
+ <video class="bg-video" autoplay muted loop playsinline>
+  <source src="<?= base_url('videos/bg.mp4') ?>" type="video/mp4">
+</video>
+<div class="bg-overlay"></div>
 
   <div class="app-wrapper active" id="app-wrapper">
-
     <!-- Header & Top Navigation Bar -->
     <header class="navbar">
       <a href="#" class="brand-logo">
@@ -231,5 +234,25 @@
   <script src="<?= base_url('js/qrcode.min.js') ?>"></script>
   <script src="<?= base_url('js/chart-custom.js') ?>"></script>
   <script src="<?= base_url('js/app.js') ?>"></script>
+  <script>
+function animateCount(el, target, duration = 1200) {
+  let startTime = null;
+  function update(currentTime) {
+    if (!startTime) startTime = currentTime;
+    const elapsed = currentTime - startTime;
+    const progress = Math.min(elapsed / duration, 1);
+    const value = Math.floor(progress * target);
+    el.textContent = value;
+    if (progress < 1) requestAnimationFrame(update);
+    else el.textContent = target;
+  }
+  requestAnimationFrame(update);
+}
+
+document.querySelectorAll('.metric-val').forEach(el => {
+  const target = parseInt(el.textContent.replace(/[^0-9]/g, '')) || 0;
+  animateCount(el, target);
+});
+</script>
 </body>
 </html>

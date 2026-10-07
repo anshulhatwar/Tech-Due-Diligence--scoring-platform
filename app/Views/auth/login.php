@@ -980,6 +980,7 @@
   payload.append('Address', form.address.value);
 
   try {
+  document.getElementById('btn-register').classList.add('loading');
     const res = await fetch('<?= base_url('api/register') ?>', {
       method: 'POST',
       headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
@@ -1012,6 +1013,7 @@
   payload.append('Password', form.password.value);
 
   try {
+    document.getElementById('btn-login').classList.add('loading');
     const res = await fetch('<?= base_url('api/login') ?>', {
       method: 'POST',
       headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
@@ -1037,16 +1039,17 @@
       document.getElementById('panel-login').classList.add('active');
     });
 
-    document.getElementById('tab-register-btn').addEventListener('click', function() {
-      document.getElementById('tab-login-btn').classList.remove('active');
-      this.classList.add('active');
-      document.getElementById('panel-login').classList.remove('active');
-      document.getElementById('panel-register').classList.add('active');
-      document.getElementById('forgot-password-link').addEventListener('click', function(e) {
+  document.getElementById('tab-register-btn').addEventListener('click', function() {
+  document.getElementById('tab-login-btn').classList.remove('active');
+  this.classList.add('active');
+  document.getElementById('panel-login').classList.remove('active');
+  document.getElementById('panel-register').classList.add('active');
+});
+
+document.getElementById('forgot-password-link').addEventListener('click', function(e) {
   e.preventDefault();
   alert('Password reset feature coming soon. Please contact support.');
 });
-    });
-  </script>
+</script>
 </body>
 </html>

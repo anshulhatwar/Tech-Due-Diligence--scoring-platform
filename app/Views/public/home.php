@@ -192,7 +192,7 @@
 
   <!-- ============ NAVBAR ============ -->
   <header class="home-navbar">
-    <a href="<?= base_url('/') ?>" class="brand-logo" style="display:flex; align-items:center; gap:10px;">
+    <a href="<?= base_url('/') ?>" class="brand-logo" style="display:flex; align-items:center; gap:10px; margin-left: 8.5rem;">
       <img src="<?= base_url('images/logo.png') ?>" alt="Credence" style="height:80px;">
     </a>
     <nav class="home-nav-links">
