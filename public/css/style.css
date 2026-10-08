@@ -75,19 +75,53 @@ code {
    AUTH SCREEN
    ========================================================================== */
 
+/* 1. Auth Screen (isme se z-index hata diya hai) */
+/* 1. Auth Screen: Yahan background transparent karna CRITICAL hai */
 .auth-screen {
+  position: relative;
   min-height: 100vh;
   display: flex;
   align-items: center;
   justify-content: center;
+  padding: 2rem 1.25rem;
+  background: transparent !important; /* Yeh line solid background ko hata degi */
+}
+
+/* 2. Blurred Background Layer (Sabse peeche: Level -2) */
+.auth-screen::before {
+  content: '';
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
   background-image: url('../images/loginn.jpg');
   background-size: cover;
   background-position: center;
   background-repeat: no-repeat;
-  padding: 2rem 1.25rem;
+  filter: blur(8px);
+  transform: scale(1.05);
+  z-index: -2; 
 }
 
-.auth-container { width: 100%; max-width: 460px; }
+/* 3. Canvas Dots Layer (Blur ke upar: Level -1) */
+#cursor-canvas {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  z-index: -1; 
+}
+
+/* 4. Login Form Layer (Sabse aage: Level 10) */
+.auth-container {
+  width: 100%;
+  max-width: 460px;
+  position: relative;
+  z-index: 10; 
+}
 
 .auth-brand { text-align: center; margin-bottom: 1.75rem; color: #fff; }
 
@@ -798,4 +832,73 @@ p, .page-desc, .card-desc {
   background: rgba(248, 250, 252, 0.85);
   z-index: -1;
   pointer-events: none;
+}
+/* ==========================================================================
+   CURSOR ANIMATION CANVAS
+   ========================================================================== */
+#cursor-canvas {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none; /* Forms aur buttons proper click hone ke liye */
+  z-index: 0; /* .bg-overlay (-1) ke theek upar rahega */
+}
+
+/* Auth Card ko canvas ke upar rakhne ke liye z-index add kar rahe hain */
+.auth-card {
+  position: relative;
+  z-index: 5; 
+}
+/* =========================================================
+   CRAZY UI EFFECTS: Spotlight & Cyberpunk Laser
+   ========================================================= */
+
+/* 1. Auth Card Spotlight Overflow Fix */
+.auth-card {
+  position: relative;
+  z-index: 10;
+  overflow: hidden; /* Laser aur spotlight ko card ke bahar aane se rokne ke liye */
+}
+
+/* Windows 11 Style Spotlight Overlay */
+.auth-card::after {
+  content: "";
+  position: absolute;
+  top: 0; left: 0; width: 100%; height: 100%;
+  background: radial-gradient(
+    600px circle at var(--mouse-x, 50%) var(--mouse-y, 50%), 
+    rgba(255, 255, 255, 0.1), /* Glow ka color */
+    transparent 40%
+  );
+  z-index: -1; /* Card content ke peeche */
+  pointer-events: none;
+}
+
+/* 2. Cyberpunk Laser Scan on Submit Button */
+.auth-submit-btn {
+  position: relative;
+  overflow: hidden;
+}
+
+.auth-submit-btn::before {
+  content: '';
+  position: absolute;
+  top: -50%; left: -50%; width: 200%; height: 12px;
+  background: rgba(255, 255, 255, 0.5);
+  transform: rotate(35deg);
+  box-shadow: 0 0 10px rgba(255,255,255,0.8);
+  opacity: 0;
+  transition: opacity 0.3s;
+}
+
+.auth-submit-btn:hover::before {
+  opacity: 1;
+  animation: laserScan 1.2s infinite linear;
+}
+
+@keyframes laserScan {
+  0% { top: -50%; left: -50%; }
+  100% { top: 150%; left: 150%; }
 }
