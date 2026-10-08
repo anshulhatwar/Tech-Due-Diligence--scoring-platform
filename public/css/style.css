@@ -711,11 +711,91 @@ textarea.form-control { min-height: 90px; resize: vertical; }
   .wizard-steps-8 { grid-template-columns: repeat(4, 1fr); row-gap: 1rem; }
   .wizard-progress-fill { display: none; }
 }
-
-@media (prefers-reduced-motion: reduce) {
-  * { transition: none !important; }
-}
 @keyframes fadeInUp {
-  from { opacity: 0; transform: translateY(14px); }
+  from { opacity: 0; transforsm: translateY(14px); }
   to { opacity: 1; transform: translateY(0); }
+}
+/* ===== GLASSMORPHISM ===== */
+.card, .metric-card, .service-card {
+  background: rgba(255, 255, 255, 0.55);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  border: 1px solid rgba(255, 255, 255, 0.4);
+  box-shadow: 0 8px 24px rgba(15, 23, 42, 0.08);
+}
+/* ===== MICRO-INTERACTIONS ===== */
+
+/* Button click ripple */
+.btn, .hero-btn, .auth-submit-btn {
+  position: relative;
+  overflow: hidden;
+}
+.btn:active, .hero-btn:active, .auth-submit-btn:active {
+  transform: scale(0.97);
+}
+
+/* Form input focus glow */
+.form-control:focus, .form-select:focus {
+  outline: none;
+  border-color: var(--primary);
+  box-shadow: 0 0 0 4px rgba(15, 110, 92, 0.15);
+  transition: box-shadow 0.2s ease, border-color 0.2s ease;
+}
+
+/* Loading spinner (add class "loading" via JS when form submits) */
+.btn.loading, .auth-submit-btn.loading {
+  pointer-events: none;
+  opacity: 0.7;
+}
+.btn.loading::after, .auth-submit-btn.loading::after {
+  content: '';
+  display: inline-block;
+  width: 14px;
+  height: 14px;
+  margin-left: 8px;
+  border: 2px solid rgba(255,255,255,0.5);
+  border-top-color: #fff;
+  border-radius: 50%;
+  animation: spin 0.6s linear infinite;
+  vertical-align: middle;
+}
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+/* ===== TYPOGRAPHY ===== */
+h1, .page-title, .hero-title {
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  line-height: 1.15;
+}
+h2, .card-title, .section-title {
+  font-weight: 700;
+  letter-spacing: -0.01em;
+  line-height: 1.25;
+}
+p, .page-desc, .card-desc {
+  line-height: 1.65;
+  color: var(--ink-soft, #475569);
+}
+.hero-eyebrow, .section-eyebrow, .sidebar-title {
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  font-size: 0.78rem;
+  font-weight: 700;
+}
+.bg-video {
+  position: fixed;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  z-index: -2;
+  pointer-events: none;
+}
+.bg-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(248, 250, 252, 0.85);
+  z-index: -1;
+  pointer-events: none;
 }
