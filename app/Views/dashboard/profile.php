@@ -91,7 +91,7 @@
             </div>
           </div>
 
-          <form id="startup-profile-form" method="post" action="<?= base_url('profile/save') ?>">
+          <form id="startup-profile-form">
             <!-- Basic Info -->
             <div class="card">
               <div class="card-header">
