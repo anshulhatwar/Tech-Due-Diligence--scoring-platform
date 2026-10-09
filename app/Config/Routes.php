@@ -15,6 +15,7 @@ $routes->get('/documents', 'Auth::documents');
 
 $routes->get('/', 'PublicPage::home');
 $routes->get('/home', 'PublicPage::home');
+$routes->get('/apply', 'Auth::apply');
 
 
 // =========================

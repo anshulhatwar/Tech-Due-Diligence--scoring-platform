@@ -20,6 +20,11 @@
 
     <!-- Header & Top Navigation Bar -->
     <header class="navbar">
+      <button id="sidebar-toggle" class="hamburger-btn">
+  <span class="bar bar1"></span>
+  <span class="bar bar2"></span>
+  <span class="bar bar3"></span>
+</button>
       <a href="<?= base_url('dashboard') ?>" class="brand-logo">
         <img src="<?= base_url('images/logo.png') ?>" alt="Credence" style="height:34px;">
         <div>
@@ -148,5 +153,16 @@
   <script src="<?= base_url('js/qrcode.min.js') ?>"></script>
   <script src="<?= base_url('js/chart-custom.js') ?>"></script>
   <script src="<?= base_url('js/app.js') ?>"></script>
+  <script>
+   document.getElementById('sidebar-toggle')?.addEventListener('click', function() {
+  const sidebar = document.querySelector('.sidebar');
+  sidebar.classList.toggle('collapsed');
+  this.classList.toggle('active');
+  
+  // Button pe chhota bounce effect
+  this.style.transform = 'scale(0.85)';
+  setTimeout(() => { this.style.transform = 'scale(1)'; }, 150);
+});
+  </script>
 </body>
 </html>

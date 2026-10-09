@@ -902,3 +902,134 @@ p, .page-desc, .card-desc {
   0% { top: -50%; left: -50%; }
   100% { top: 150%; left: 150%; }
 }
+/* ===== SIDEBAR TOGGLE ===== */
+.sidebar {
+  transition: transform 0.3s ease, width 0.3s ease;
+}
+.sidebar.collapsed {
+  width: 0;
+  overflow: hidden;
+  padding: 0;
+  border: none;
+}
+/* ===== SIDEBAR NAV LINKS ANIMATION ===== */
+.sidebar .nav-link {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 14px;
+  border-radius: 10px;
+  margin-bottom: 4px;
+  transition: all 0.25s ease;
+  overflow: hidden;
+}
+
+/* ===== SIDEBAR OPEN/CLOSE ANIMATION ===== */
+.sidebar {
+  transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1), 
+              opacity 0.3s ease, 
+              width 0.4s cubic-bezier(0.4, 0, 0.2, 1),
+              box-shadow 0.4s ease;
+  transform: translateX(0) scale(1);
+  opacity: 1;
+}
+
+.sidebar.collapsed {
+  transform: translateX(-30px) scale(0.95);
+  width: 0;
+  opacity: 0;
+  overflow: hidden;
+  padding: 0;
+  border: none;
+  box-shadow: none;
+}
+
+/* Jab sidebar khula ho, halka shadow + glow dikhe */
+.sidebar:not(.collapsed) {
+  box-shadow: 4px 0 20px rgba(15, 110, 92, 0.08);
+}
+
+/* Main content bhi thoda shift ho smoothly jab sidebar close ho */
+.main-content {
+  transition: margin-left 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+}
+/* ===== ANIMATED HAMBURGER ===== */
+.hamburger-btn {
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 10px;
+  margin-right: 12px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 5px;
+  width: 36px;
+  height: 36px;
+  transition: transform 0.15s ease;
+}
+
+.hamburger-btn .bar {
+  width: 22px;
+  height: 2.5px;
+  background: var(--navy-900, #0f172a);
+  border-radius: 2px;
+  transition: transform 0.35s cubic-bezier(0.68, -0.55, 0.27, 1.55), opacity 0.25s ease;
+}
+
+.hamburger-btn.active .bar1 {
+  transform: translateY(7.5px) rotate(45deg);
+}
+.hamburger-btn.active .bar2 {
+  opacity: 0;
+}
+.hamburger-btn.active .bar3 {
+  transform: translateY(-7.5px) rotate(-45deg);
+  /* ===== ANIMATED HAMBURGER ===== */
+.hamburger-btn {
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 10px;
+  margin-right: 12px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 5px;
+  width: 36px;
+  height: 36px;
+}
+
+.hamburger-btn .bar {
+  width: 22px;
+  height: 2.5px;
+  background: var(--navy-900, #0f172a);
+  border-radius: 2px;
+  transition: transform 0.35s cubic-bezier(0.68, -0.55, 0.27, 1.55), opacity 0.25s ease;
+}
+
+/* Jab active class lage, X banega */
+.hamburger-btn.active .bar1 {
+  transform: translateY(7.5px) rotate(45deg);
+}
+.hamburger-btn.active .bar2 {
+  opacity: 0;
+}
+.hamburger-btn.active .bar3 {
+  transform: translateY(-7.5px) rotate(-45deg);
+}
+
+/* Sidebar smooth slide */
+.sidebar {
+  transition: transform 0.35s cubic-bezier(0.4, 0, 0.2, 1), width 0.35s ease, opacity 0.3s ease;
+}
+.sidebar.collapsed {
+  transform: translateX(-100%);
+  width: 0;
+  opacity: 0;
+  overflow: hidden;
+  padding: 0;
+  border: none;
+}
+}

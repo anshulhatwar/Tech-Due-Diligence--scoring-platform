@@ -15,7 +15,6 @@
   <link rel="stylesheet" href="<?= base_url('css/style.css') ?>">
 </head>
 <body>
-  <canvas id="cursor-canvas"></canvas>
 
   <!-- =============================================
        AUTHENTICATION SCREEN (Registration / Login)
