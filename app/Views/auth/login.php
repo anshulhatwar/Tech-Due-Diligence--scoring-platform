@@ -15,6 +15,7 @@
   <link rel="stylesheet" href="<?= base_url('css/style.css') ?>">
 </head>
 <body>
+  <canvas id="cursor-canvas"></canvas>
 
   <!-- =============================================
        AUTHENTICATION SCREEN (Registration / Login)
@@ -1258,6 +1259,154 @@ document.getElementById('forgot-password-link').addEventListener('click', functi
   e.preventDefault();
   alert('Password reset feature coming soon. Please contact support.');
 });
+</script>
+<!-- 3D Tilt Library (Apple/Glassmorphism feel ke liye) -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/vanilla-tilt/1.8.1/vanilla-tilt.min.js"></script>
+
+<script>
+  // ==========================================
+  // 1. INITIALIZE 3D CARD TILT
+  // ==========================================
+  VanillaTilt.init(document.querySelector(".auth-card"), {
+    max: 5,           // Kitna tilt hoga (kam rakha hai taaki professional lage)
+    speed: 400,
+    glare: true,      // Sheeshe jaisa reflection
+    "max-glare": 0.15 
+  });
+
+  // ==========================================
+  // 2. WINDOWS 11 SPOTLIGHT TRACKER
+  // ==========================================
+  const authCard = document.querySelector('.auth-card');
+  authCard.addEventListener('mousemove', (e) => {
+    const rect = authCard.getBoundingClientRect();
+    const x = e.clientX - rect.left;
+    const y = e.clientY - rect.top;
+    // CSS me coordinates pass kar rahe hain
+    authCard.style.setProperty('--mouse-x', `${x}px`);
+    authCard.style.setProperty('--mouse-y', `${y}px`);
+  });
+
+  // ==========================================
+  // 3. MOOD SWING PARTICLES
+  // ==========================================
+  const canvas = document.getElementById('cursor-canvas');
+  const ctx = canvas.getContext('2d');
+  let particlesArray = [];
+
+  // Default theme color (Navy) aur radius
+  let currentParticleColor = 'rgba(11, 23, 48, 0.7)';
+  let currentRepelRadius = 130;
+
+  let mouse = {
+    x: null,
+    y: null
+  };
+
+  window.addEventListener('mousemove', function(event) {
+    mouse.x = event.clientX;
+    mouse.y = event.clientY;
+  });
+
+  window.addEventListener('mouseout', function() {
+    mouse.x = undefined;
+    mouse.y = undefined;
+  });
+
+  function resizeCanvas() {
+    canvas.width = window.innerWidth;
+    canvas.height = window.innerHeight;
+    init(); 
+  }
+  window.addEventListener('resize', resizeCanvas);
+  canvas.width = window.innerWidth;
+  canvas.height = window.innerHeight;
+
+  class Particle {
+    constructor(x, y) {
+      this.x = x;
+      this.y = y;
+      this.baseX = this.x;
+      this.baseY = this.y;
+      this.size = Math.random() * 2 + 1;
+      this.density = (Math.random() * 30) + 5;
+    }
+
+    draw() {
+      // Dynamic color (Normal vs Password focus)
+      ctx.fillStyle = currentParticleColor; 
+      ctx.beginPath();
+      ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+      ctx.closePath();
+      ctx.fill();
+    }
+
+    update() {
+      let dx = mouse.x - this.x;
+      let dy = mouse.y - this.y;
+      let distance = Math.sqrt(dx * dx + dy * dy);
+      
+      // Dynamic radius use kar rahe hain
+      if (distance < currentRepelRadius) {
+        let forceDirectionX = dx / distance;
+        let forceDirectionY = dy / distance;
+        let force = (currentRepelRadius - distance) / currentRepelRadius;
+        
+        let directionX = forceDirectionX * force * this.density;
+        let directionY = forceDirectionY * force * this.density;
+        
+        this.x -= directionX;
+        this.y -= directionY;
+      } else {
+        if (this.x !== this.baseX) {
+          let dx = this.x - this.baseX;
+          this.x -= dx / 15;
+        }
+        if (this.y !== this.baseY) {
+          let dy = this.y - this.baseY;
+          this.y -= dy / 15;
+        }
+      }
+    }
+  }
+
+  function init() {
+    particlesArray = [];
+    let numberOfParticles = (canvas.width * canvas.height) / 4500; 
+    for (let i = 0; i < numberOfParticles; i++) {
+      let x = Math.random() * canvas.width;
+      let y = Math.random() * canvas.height;
+      particlesArray.push(new Particle(x, y));
+    }
+  }
+
+  function animate() {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    for (let i = 0; i < particlesArray.length; i++) {
+      particlesArray[i].update();
+      particlesArray[i].draw();
+    }
+    requestAnimationFrame(animate);
+  }
+
+  init();
+  animate();
+
+  // PASSWORD FOCUS LOGIC (Mood Swings)
+  const passInputs = document.querySelectorAll('input[type="password"]');
+  passInputs.forEach(input => {
+    input.addEventListener('focus', () => {
+      // Jab password field focus ho: Tech Teal color aur bada repel radius (Secure Zone)
+      currentParticleColor = 'rgba(22, 199, 154, 0.9)'; 
+      currentRepelRadius = 250; 
+    });
+    
+    input.addEventListener('blur', () => {
+      // Jab focus hate: Wapas Navy normal mode
+      currentParticleColor = 'rgba(11, 23, 48, 0.7)'; 
+      currentRepelRadius = 130; 
+    });
+  });
 </script>
 </body>
 </html>
