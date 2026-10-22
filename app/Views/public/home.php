@@ -199,7 +199,6 @@
       <a href="#" class="active">Home</a>
       <a href="#about">About</a>
       <a href="#services">Services</a>
-      <a href="<?= base_url('login') ?>">Register</a>
       <a href="#contact">Contact Us</a>
     </nav>
     <a href="<?= base_url('login') ?>" class="home-cta-btn">Get Started</a>
@@ -337,13 +336,15 @@
   </section>
 
   <!-- ============ REGISTER CTA ============ -->
-  <section class="register-band reveal">
-    <div class="register-mock">
-      <div class="register-mock-title">Start Verifying Today.</div>
-      <div class="register-mock-bar" style="width:70%;"></div>
-      <div class="register-mock-bar" style="width:45%;"></div>
-      <div class="register-mock-bar" style="width:85%;"></div>
+<section class="register-band reveal">
+  <div class="register-mock">
+    <div class="register-mock-title">Start Verifying Today.</div>
+    <div class="register-mock-features">
+      <div class="register-feature">✓ Quick Registration</div>
+      <div class="register-feature">✓ Document-Based Verification</div>
+      <div class="register-feature">✓ Verified Trust Score in Days</div>
     </div>
+  </div>
     <div>
       <div class="register-eyebrow">Register</div>
       <h2 class="register-title">Create Your Account</h2>

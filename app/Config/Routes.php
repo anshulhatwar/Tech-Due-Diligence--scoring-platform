@@ -16,6 +16,8 @@ $routes->get('/documents', 'Auth::documents');
 $routes->get('/', 'PublicPage::home');
 $routes->get('/home', 'PublicPage::home');
 $routes->get('/apply', 'Auth::apply');
+$routes->get('/admin', 'Auth::adminDashboard');
+$routes->get('/admin/params', 'Auth::adminParams');
 
 
 // =========================
@@ -35,3 +37,4 @@ $routes->post('api/logout', 'Auth\AuthController::logout');
 $routes->post('api/company', 'Company\CompanyController::create');
 $routes->get('api/company', 'Company\CompanyController::show');
 $routes->put('api/company', 'Company\CompanyController::update');
+// =====================================

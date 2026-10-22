@@ -1033,3 +1033,14 @@ p, .page-desc, .card-desc {
   border: none;
 }
 }
+.register-mock-features {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-top: 1rem;
+}
+.register-feature {
+  font-size: 0.95rem;
+  color: rgba(255,255,255,0.85);
+  font-weight: 500;
+}

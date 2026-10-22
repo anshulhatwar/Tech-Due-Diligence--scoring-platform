@@ -26,4 +26,12 @@ class Auth extends BaseController
     {
         return view('dashboard/apply');
     }
+    public function adminDashboard()
+{
+    return view('admin/dashboard');
+}
+public function adminParams()
+{
+    return view('admin/params');
+}
 }

@@ -5,6 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Document Manager — Credence</title>
   <meta name="description" content="Credence Tech Due-Diligence & Trust Score Platform — Document Manager">
+  <meta name="view-transition" content="same-origin">
 
   <!-- Modern Font Stack -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
