@@ -5,7 +5,6 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Document Manager — Credence</title>
   <meta name="description" content="Credence Tech Due-Diligence & Trust Score Platform — Document Manager">
-  <meta name="view-transition" content="same-origin">
 
   <!-- Modern Font Stack -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -128,6 +127,9 @@
               </div>
               <button type="submit" class="btn btn-primary">Upload Document</button>
             </form>
+            <div style="display:flex; justify-content:flex-end; margin-top:1rem;">
+  <button type="button" id="btn-docs-next" class="btn btn-primary">Save & Next →</button>
+</div>
           </div>
 
           <!-- Uploaded Documents List -->
@@ -151,9 +153,26 @@
   </div>
 
   <!-- Vendor JS Libraries -->
-  <script src="<?= base_url('js/qrcode.min.js') ?>"></script>
-  <script src="<?= base_url('js/chart-custom.js') ?>"></script>
-  <script src="<?= base_url('js/app.js') ?>"></script>
+  <script>
+  document.getElementById('sidebar-toggle')?.addEventListener('click', function() {
+    document.querySelector('.sidebar').classList.toggle('collapsed');
+    this.classList.toggle('active');
+  });
+  document.getElementById('btn-docs-next')?.addEventListener('click', async function() {
+  const count = parseInt(document.getElementById('docs-count').textContent) || 0;
+  if (count < 3) {
+    alert('Atleast 3 documents required. Currently: ' + count);
+    return;
+  }
+  const res = await fetch('<?= base_url('documents/save') ?>', { method: 'POST' });
+  const result = await res.json();
+  if (result.status) {
+    window.location.href = '<?= base_url('apply') ?>';
+  } else {
+    alert(result.message || 'Save failed');
+  }
+});
+</script>
   <script>
    document.getElementById('sidebar-toggle')?.addEventListener('click', function() {
   const sidebar = document.querySelector('.sidebar');

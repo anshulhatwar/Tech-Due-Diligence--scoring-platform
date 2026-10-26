@@ -5,7 +5,6 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Company Profile — Credence</title>
   <meta name="description" content="Credence Tech Due-Diligence & Trust Score Platform — Company Profile">
-  <meta name="view-transition" content="same-origin">
 
   <!-- Modern Font Stack -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -209,7 +208,7 @@
             </div>
 
             <div style="display:flex; justify-content:flex-end;">
-              <button type="submit" class="btn btn-primary">Save Company Profile & Proceed →</button>
+              <button type="submit" class="btn btn-primary">Save and next →</button>
             </div>
           </form>
         </section>
@@ -219,14 +218,23 @@
   </div>
 
   <!-- Vendor JS Libraries -->
-  <script src="<?= base_url('js/qrcode.min.js') ?>"></script>
-  <script src="<?= base_url('js/chart-custom.js') ?>"></script>
-  <script src="<?= base_url('js/app.js') ?>"></script>
+ 
   <script>
    document.getElementById('sidebar-toggle')?.addEventListener('click', function() {
   const sidebar = document.querySelector('.sidebar');
   sidebar.classList.toggle('collapsed');
   this.classList.toggle('active');
+  document.getElementById('startup-profile-form').addEventListener('submit', async function(e) {
+  e.preventDefault();
+  const res = await fetch('<?= base_url('profile/save') ?>', { method: 'POST' });
+  const result = await res.json();
+  if (result.status) {
+    alert('Profile save ho gaya! Ab Document Manager khul gaya.');
+    window.location.href = '<?= base_url('documents') ?>';
+  } else {
+    alert(result.message || 'Save failed');
+  }
+});
   
   // Button pe chhota bounce effect
   this.style.transform = 'scale(0.85)';

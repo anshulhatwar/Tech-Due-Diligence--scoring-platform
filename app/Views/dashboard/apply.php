@@ -20,9 +20,9 @@
   <span class="bar bar2"></span>
   <span class="bar bar3"></span>
 </button>
-  <a href="#" class="brand-logo">
-    <div class="brand-badge">CREDENCE</div>
-    <div>
+  <a href="<?= base_url('dashboard') ?>" class="brand-logo">
+  <img src="<?= base_url('images/logo.png') ?>" alt="Credence" style="height:34px;">
+  <div>...</div>
       <div class="brand-title">Tech Due-Diligence & Trust Score</div>
       <span class="brand-sub">Verification & Assessment Platform</span>
     </div>
