@@ -36,8 +36,8 @@
       <div class="nav-controls">
         <!-- User Info -->
         <div class="nav-user-info">
-          <div class="nav-user-avatar" id="nav-user-avatar">VS</div>
-          <span id="nav-user-name">Vikram Seth</span>
+          <div class="nav-user-avatar"><?= esc($userInitials ?? 'U') ?></div>
+<span><?= esc($userName ?? 'User') ?></span>
         </div>
 
         <button class="nav-logout-btn" id="btn-logout">Logout</button>

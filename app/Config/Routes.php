@@ -18,6 +18,7 @@ $routes->get('/home', 'PublicPage::home');
 $routes->get('/apply', 'Auth::apply');
 $routes->get('/admin', 'Auth::adminDashboard');
 $routes->get('/admin/params', 'Auth::adminParams');
+$routes->get('/eval', 'Auth::evalDashboard');
 
 
 // =========================

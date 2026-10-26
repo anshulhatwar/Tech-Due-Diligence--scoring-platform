@@ -22,8 +22,8 @@
         </a>
         <div class="nav-controls">
             <div class="nav-user-info">
-                <div class="nav-user-avatar" style="background:var(--amber);">AD</div>
-                <span>Admin Master</span>
+                <div class="nav-user-avatar"><?= esc($userInitials ?? 'U') ?></div>
+<span><?= esc($userName ?? 'User') ?></span>
             </div>
             <a href="<?= base_url('login') ?>" class="nav-logout-btn">Logout</a>
         </div>
