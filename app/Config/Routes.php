@@ -34,3 +34,10 @@ $routes->post('api/logout', 'Auth\AuthController::logout');
 $routes->post('api/company', 'Company\CompanyController::create');
 $routes->get('api/company', 'Company\CompanyController::show');
 $routes->put('api/company', 'Company\CompanyController::update');
+
+// DOCUMENT APIs
+$routes->post('api/documents', 'Document\DocumentController::upload');
+$routes->get('api/documents', 'Document\DocumentController::index');
+$routes->get('api/documents/(:num)', 'Document\DocumentController::show/$1');
+$routes->delete('api/documents/(:num)', 'Document\DocumentController::deleteDocument/$1');
+$routes->put('api/documents/(:num)/status', 'Document\DocumentController::updateStatus/$1');
