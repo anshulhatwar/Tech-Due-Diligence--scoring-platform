@@ -5,6 +5,8 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Startup Dashboard — Credence</title>
   <meta name="description" content="Credence Tech Due-Diligence & Trust Score Platform — Startup Dashboard">
+  <meta name="view-transition" content="same-origin">
+  
 
   <!-- Modern Font Stack -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -23,6 +25,11 @@
   <div class="app-wrapper active" id="app-wrapper">
     <!-- Header & Top Navigation Bar -->
     <header class="navbar">
+     <button id="sidebar-toggle" class="hamburger-btn">
+  <span class="bar bar1"></span>
+  <span class="bar bar2"></span>
+  <span class="bar bar3"></span>
+</button>
       <a href="#" class="brand-logo">
         <img src="<?= base_url('images/logo.png') ?>" alt="Credence" style="height:34px;">
         <div>
@@ -252,6 +259,15 @@ function animateCount(el, target, duration = 1200) {
 document.querySelectorAll('.metric-val').forEach(el => {
   const target = parseInt(el.textContent.replace(/[^0-9]/g, '')) || 0;
   animateCount(el, target);
+});
+document.getElementById('sidebar-toggle')?.addEventListener('click', function() {
+  const sidebar = document.querySelector('.sidebar');
+  sidebar.classList.toggle('collapsed');
+  this.classList.toggle('active');
+  
+  // Button pe chhota bounce effect
+  this.style.transform = 'scale(0.85)';
+  setTimeout(() => { this.style.transform = 'scale(1)'; }, 150);
 });
 </script>
 </body>

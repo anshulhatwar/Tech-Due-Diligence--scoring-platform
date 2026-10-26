@@ -20,6 +20,11 @@
 
     <!-- Header & Top Navigation Bar -->
     <header class="navbar">
+      <button id="sidebar-toggle" class="hamburger-btn">
+  <span class="bar bar1"></span>
+  <span class="bar bar2"></span>
+  <span class="bar bar3"></span>
+</button>
       <a href="<?= base_url('dashboard') ?>" class="brand-logo">
         <img src="<?= base_url('images/logo.png') ?>" alt="Credence" style="height:34px;">
         <div>
@@ -122,6 +127,9 @@
               </div>
               <button type="submit" class="btn btn-primary">Upload Document</button>
             </form>
+            <div style="display:flex; justify-content:flex-end; margin-top:1rem;">
+  <button type="button" id="btn-docs-next" class="btn btn-primary">Save & Next →</button>
+</div>
           </div>
 
           <!-- Uploaded Documents List -->
@@ -145,8 +153,36 @@
   </div>
 
   <!-- Vendor JS Libraries -->
-  <script src="<?= base_url('js/qrcode.min.js') ?>"></script>
-  <script src="<?= base_url('js/chart-custom.js') ?>"></script>
-  <script src="<?= base_url('js/app.js') ?>"></script>
+  <script>
+  document.getElementById('sidebar-toggle')?.addEventListener('click', function() {
+    document.querySelector('.sidebar').classList.toggle('collapsed');
+    this.classList.toggle('active');
+  });
+  document.getElementById('btn-docs-next')?.addEventListener('click', async function() {
+  const count = parseInt(document.getElementById('docs-count').textContent) || 0;
+  if (count < 3) {
+    alert('Atleast 3 documents required. Currently: ' + count);
+    return;
+  }
+  const res = await fetch('<?= base_url('documents/save') ?>', { method: 'POST' });
+  const result = await res.json();
+  if (result.status) {
+    window.location.href = '<?= base_url('apply') ?>';
+  } else {
+    alert(result.message || 'Save failed');
+  }
+});
+</script>
+  <script>
+   document.getElementById('sidebar-toggle')?.addEventListener('click', function() {
+  const sidebar = document.querySelector('.sidebar');
+  sidebar.classList.toggle('collapsed');
+  this.classList.toggle('active');
+  
+  // Button pe chhota bounce effect
+  this.style.transform = 'scale(0.85)';
+  setTimeout(() => { this.style.transform = 'scale(1)'; }, 150);
+});
+  </script>
 </body>
 </html>

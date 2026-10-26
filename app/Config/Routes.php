@@ -15,6 +15,9 @@ $routes->get('/documents', 'Auth::documents');
 
 $routes->get('/', 'PublicPage::home');
 $routes->get('/home', 'PublicPage::home');
+$routes->get('/apply', 'Auth::apply');
+$routes->get('/admin', 'Auth::adminDashboard');
+$routes->get('/admin/params', 'Auth::adminParams');
 
 
 // =========================
@@ -25,6 +28,8 @@ $routes->post('api/register', 'Auth\AuthController::register');
 $routes->post('api/login', 'Auth\AuthController::login');
 $routes->get('api/me', 'Auth\AuthController::me');
 $routes->post('api/logout', 'Auth\AuthController::logout');
+$routes->post('/documents/save', 'Auth::documentsSave');
+$routes->post('/profile/save', 'Auth::profileSave');
 
 
 // =========================
