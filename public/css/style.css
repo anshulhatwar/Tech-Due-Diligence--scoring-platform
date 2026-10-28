@@ -1044,3 +1044,5 @@ p, .page-desc, .card-desc {
   color: rgba(255,255,255,0.85);
   font-weight: 500;
 }
+.modal-backdrop { display: none; }
+.modal-backdrop.active { display: flex; }

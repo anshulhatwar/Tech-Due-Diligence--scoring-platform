@@ -166,6 +166,32 @@
             </div>
           </div>
 
+          <!-- Evaluation Status Card -->
+          <div class="card" id="evaluation-status-card">
+            <div class="card-header">
+              <h3 class="card-title">Evaluation Status</h3>
+              <span class="badge badge-new" id="eval-status-badge">Not Started</span>
+            </div>
+
+            <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap:1rem; margin-top:0.5rem;">
+              <div>
+                <div style="font-size:0.8rem; color:#64748b; font-weight:600; text-transform:uppercase;">Application</div>
+                <div style="font-weight:700;" id="eval-app-status">Not Submitted</div>
+              </div>
+              <div>
+                <div style="font-size:0.8rem; color:#64748b; font-weight:600; text-transform:uppercase;">Evaluator</div>
+                <div style="font-weight:700;" id="eval-evaluator">Not Assigned</div>
+              </div>
+              <div>
+                <div style="font-size:0.8rem; color:#64748b; font-weight:600; text-transform:uppercase;">Evaluation</div>
+                <div style="font-weight:700;" id="eval-scoring">Pending</div>
+              </div>
+              <div>
+                <div style="font-size:0.8rem; color:#64748b; font-weight:600; text-transform:uppercase;">Final Score</div>
+                <div style="font-weight:700; color:var(--primary);" id="eval-final-score">-- / 100</div>
+              </div>
+            </div>
+          </div>
           <!-- Verification Summary Card (shown once step 8 is complete) -->
           <div class="card" id="st-cert-summary-card" style="border: 2px solid var(--primary); display: none;">
             <div class="card-header">

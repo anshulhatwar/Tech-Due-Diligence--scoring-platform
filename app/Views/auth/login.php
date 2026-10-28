@@ -1022,10 +1022,13 @@
     const result = await res.json();
 
     if (result.status) {
-      window.location.href = '<?= base_url('dashboard') ?>';
-    } else {
-      alert(result.message || 'Login failed');
-    }
+  const role = result.user?.role;
+  if (role === 'Admin') window.location.href = '<?= base_url('admin') ?>';
+  else if (role === 'Evaluator') window.location.href = '<?= base_url('eval') ?>';
+  else window.location.href = '<?= base_url('dashboard') ?>';
+} else {
+  alert(result.message || 'Login failed');
+}
   } catch (err) {
     alert('Server error, dobara try karo');
   }

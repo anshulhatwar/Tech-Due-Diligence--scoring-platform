@@ -50,7 +50,11 @@ public function adminParams()
 }
 public function evalDashboard()
 {
-    if (!session()->get('logged_in') || session()->get('role') !== 'Evaluator') {
+    if (!session()->get('logged_in')) {
+        return redirect()->to(base_url('login'));
+    }
+    $role = session()->get('role');
+    if ($role !== 'Evaluator' && $role !== 'Admin') {
         return redirect()->to(base_url('login'));
     }
     return view('evaluator/dashboard', $this->userData());
