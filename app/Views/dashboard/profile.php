@@ -219,27 +219,62 @@
 
   <!-- Vendor JS Libraries -->
  
-  <script>
-   document.getElementById('sidebar-toggle')?.addEventListener('click', function() {
-  const sidebar = document.querySelector('.sidebar');
-  sidebar.classList.toggle('collapsed');
-  this.classList.toggle('active');
-  document.getElementById('startup-profile-form').addEventListener('submit', async function(e) {
-  e.preventDefault();
-  const res = await fetch('<?= base_url('profile/save') ?>', { method: 'POST' });
-  const result = await res.json();
-  if (result.status) {
-    alert('Profile save ho gaya! Ab Document Manager khul gaya.');
-    window.location.href = '<?= base_url('documents') ?>';
-  } else {
-    alert(result.message || 'Save failed');
-  }
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+
+    // Sidebar toggle
+    document.getElementById('sidebar-toggle')?.addEventListener('click', function () {
+        const sidebar = document.querySelector('.sidebar');
+
+        if (sidebar) {
+            sidebar.classList.toggle('collapsed');
+        }
+
+        this.classList.toggle('active');
+        this.style.transform = 'scale(0.85)';
+
+        setTimeout(() => {
+            this.style.transform = 'scale(1)';
+        }, 150);
+    });
+
+    // Company Profile form submission
+    const profileForm = document.getElementById('startup-profile-form');
+
+    if (profileForm) {
+        profileForm.addEventListener('submit', async function (e) {
+            e.preventDefault();
+
+            const formData = new FormData(profileForm);
+
+            try {
+                const res = await fetch('<?= base_url('profile/save') ?>', {
+                    method: 'POST',
+                    body: formData,
+                    headers: {
+                        'X-Requested-With': 'XMLHttpRequest'
+                    }
+                });
+
+                const result = await res.json();
+
+                if (res.ok && result.status) {
+                    alert('Profile save ho gaya!');
+
+                    window.location.href = '<?= base_url('documents') ?>';
+                } else {
+                    alert(result.message || 'Profile save nahi hua.');
+                }
+
+            } catch (error) {
+                console.error('Profile save error:', error);
+                alert('Server se connection nahi ho pa raha. Console check karo.');
+            }
+        });
+    }
+
 });
-  
-  // Button pe chhota bounce effect
-  this.style.transform = 'scale(0.85)';
-  setTimeout(() => { this.style.transform = 'scale(1)'; }, 150);
-});
-  </script>
+</script>
+
 </body>
 </html>
