@@ -1046,3 +1046,35 @@ p, .page-desc, .card-desc {
 }
 .modal-backdrop { display: none; }
 .modal-backdrop.active { display: flex; }
+/* ===== HOME: VERIFY SECTION ===== */
+.verify-section {
+  padding: 60px 20px;
+  background: #f8fafc;
+  text-align: center;
+}
+.verify-inner {
+  max-width: 640px;
+  margin: 0 auto;
+}
+.verify-form {
+  display: flex;
+  gap: 10px;
+  margin: 1.5rem auto 0;
+  max-width: 520px;
+}
+.verify-form .form-control { flex: 1; }
+.verify-result {
+  margin-top: 1.5rem;
+  background: #fff;
+  border-radius: 12px;
+  padding: 1.25rem;
+  text-align: left;
+  box-shadow: 0 8px 24px rgba(15,23,42,0.08);
+}
+.verify-section.dark {
+  background: linear-gradient(135deg, #0f172a, #0F6E5C);
+  color: #fff;
+}
+.verify-section.dark .section-title,
+.verify-section.dark .section-desc { color: #fff; }
+.verify-section { min-height: 320px; display: flex; align-items: center; }

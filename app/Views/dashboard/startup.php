@@ -228,6 +228,63 @@
               </div>
             </div>
           </div>
+          <!-- Verified Directory Card -->
+<div class="card" id="directory-card">
+  <div class="card-header">
+    <h3 class="card-title">Verified Directory</h3>
+    <span class="badge badge-active">Public</span>
+  </div>
+
+  <div style="display:flex; gap:10px; flex-wrap:wrap; margin-bottom:1rem;">
+    <input type="text" id="dir-search" class="form-control" placeholder="Search by company name..." style="flex:1; min-width:200px;">
+    <select id="dir-industry" class="form-select" style="width:220px;">
+      <option value="">All Industries</option>
+      <option value="DeepTech / AI">DeepTech / AI</option>
+      <option value="FinTech">FinTech</option>
+      <option value="HealthTech / MedTech">HealthTech / MedTech</option>
+    </select>
+  </div>
+
+  <div class="table-responsive">
+    <table class="custom-table">
+      <thead>
+        <tr>
+          <th>Company</th>
+          <th>Industry</th>
+          <th>Score</th>
+          <th>Verification ID</th>
+          <th>Status</th>
+        </tr>
+      </thead>
+      <tbody id="dir-body"></tbody>
+    </table>
+  </div>
+  <div id="dir-empty" class="empty-state" style="display:none;">
+    <div class="empty-state-icon">🔍</div>
+    <h3>No Verified Companies Found</h3>
+  </div>
+</div>
+          <!-- Certificate Card (shown after Credence approval) -->
+<div class="card" id="certificate-card" style="display:none; border:2px solid var(--primary);">
+  <div class="card-header">
+    <h3 class="card-title" style="color:var(--primary);">Certificate Issued</h3>
+    <span class="badge badge-active">Active</span>
+  </div>
+
+  <div style="display:grid; grid-template-columns: 1fr auto; gap:2rem; align-items:center;">
+    <div>
+      <div style="font-size:0.8rem; color:#64748b; font-weight:600; text-transform:uppercase;">Verification ID</div>
+      <div style="font-family:monospace; font-size:1.4rem; font-weight:700; color:var(--primary);" id="cert-ver-id">--</div>
+      <p style="font-size:0.9rem; color:#334155; margin-top:10px;">
+        Your Credence Trust Score certificate has been approved. This verification ID and QR code will be used for public verification.
+      </p>
+    </div>
+    <div id="cert-qr" style="padding:12px; background:#fff; border:2px solid var(--primary); border-radius:8px; text-align:center;">
+      <div style="font-size:0.8rem; color:#64748b;">QR Code</div>
+      <div style="font-weight:700; font-family:monospace;" id="cert-qr-text">--</div>
+    </div>
+  </div>
+</div>
 
           <!-- Submitted Documents Overview -->
           <div class="card">
@@ -295,6 +352,39 @@ document.getElementById('btn-logout')?.addEventListener('click', async function(
   await fetch('<?= base_url('api/logout') ?>', { method: 'POST' });
   window.location.href = '<?= base_url('login') ?>';
 });
+// ===== Certificate card (demo) =====
+function showCertificate(verId) {
+  document.getElementById('cert-ver-id').textContent = verId;
+  document.getElementById('cert-qr-text').textContent = verId;
+  document.getElementById('certificate-card').style.display = 'block';
+}
+// ===== Verified Directory (demo data) =====
+const demoDirectory = [
+  { company: 'Demo Tech Pvt Ltd', industry: 'DeepTech / AI', score: 78, verId: 'CREDENCE-TD-2026-12345', status: 'Active' },
+  { company: 'FinNova Systems', industry: 'FinTech', score: 86, verId: 'CREDENCE-TD-2026-00221', status: 'Active' },
+  { company: 'MediCore Labs', industry: 'HealthTech / MedTech', score: 82, verId: 'CREDENCE-TD-2026-00317', status: 'Active' }
+];
+
+function renderDirectory() {
+  const q = document.getElementById('dir-search').value.trim().toLowerCase();
+  const ind = document.getElementById('dir-industry').value;
+  const rows = demoDirectory.filter(c =>
+    c.company.toLowerCase().includes(q) && (ind === '' || c.industry === ind)
+  );
+  document.getElementById('dir-body').innerHTML = rows.map(c => `
+    <tr>
+      <td><strong>${c.company}</strong></td>
+      <td>${c.industry}</td>
+      <td>${c.score} / 100</td>
+      <td><code>${c.verId}</code></td>
+      <td><span class="badge badge-active">${c.status}</span></td>
+    </tr>`).join('');
+  document.getElementById('dir-empty').style.display = rows.length ? 'none' : 'block';
+}
+
+document.getElementById('dir-search').addEventListener('input', renderDirectory);
+document.getElementById('dir-industry').addEventListener('change', renderDirectory);
+renderDirectory();
 </script>
 </body>
 </html>

@@ -104,13 +104,97 @@
             </tr>
           </thead>
           <tbody>
-            <tr>
-              <td colspan="6" style="text-align:center; color:#64748b;">No applications yet — backend se data aane par yahan dikhega</td>
-            </tr>
-          </tbody>
+  <tr>
+    <td>Demo Tech Pvt Ltd</td>
+    <td><span class="badge badge-new">Submitted</span></td>
+    <td id="assigned-eval-demo">Not Assigned</td>
+    <td>--</td>
+    <td>--</td>
+    <td>
+      <button class="btn btn-primary btn-sm" onclick="openAssignModal('Demo Tech Pvt Ltd')">Assign Evaluator</button>
+      <button class="btn btn-success btn-sm" onclick="openReview('Demo Tech Pvt Ltd')" style="margin-left:6px;">Review</button>
+    </td>
+  </tr>
+</tbody>
         </table>
       </div>
     </div>
+    <!-- Assign Evaluator Modal -->
+<div class="modal-backdrop" id="assign-modal">
+  <div class="modal-box">
+    <div class="modal-header">
+      <h3 class="card-title">Assign Evaluator to <span id="assign-company"></span></h3>
+      <button class="modal-close" onclick="closeAssign()">&times;</button>
+    </div>
+    <div class="form-group">
+      <label class="form-label">Select Qualified Evaluator</label>
+      <select id="assign-evaluator-select" class="form-select">
+        <option value="">-- Select Evaluator --</option>
+        <option value="Anshul ">Anshul  (DeepTech / AI)</option>
+        <option value="Madhur">Madhur (FinTech)</option>
+        <option value="Aryan">Aryan (HealthTech)</option>
+      </select>
+    </div>
+    <div style="display:flex; justify-content:flex-end; gap:10px; margin-top:1rem;">
+      <button class="btn btn-secondary" onclick="closeAssign()">Cancel</button>
+      <button class="btn btn-primary" onclick="confirmAssign()">Assign & Notify Evaluator</button>
+    </div>
+  </div>
+</div>
+<!-- Review & Certificate Modal -->
+<div class="modal-backdrop" id="review-modal">
+  <div class="modal-box" style="max-width:600px;">
+    <div class="modal-header">
+      <h3 class="card-title">Review: <span id="review-company"></span></h3>
+      <button class="modal-close" onclick="closeReview()">&times;</button>
+    </div>
+
+    <div style="background:#f8fafc; padding:12px; border-radius:var(--radius-md); margin-bottom:1rem; border:1px solid #e2e8f0;">
+      <strong>Evaluator Score:</strong> <span id="review-score" style="color:var(--primary); font-weight:700;">78 / 100</span><br>
+      <strong>Evaluator:</strong> <span id="review-evaluator">Anshul</span>
+    </div>
+
+    <div class="form-group">
+      <label class="form-label">CREDENCE Verification ID</label>
+      <input type="text" id="review-verid" class="form-control" readonly>
+    </div>
+
+    <div id="review-qr" style="text-align:center; margin:1rem 0;"></div>
+
+    <div style="display:flex; justify-content:flex-end; gap:10px;">
+      <button class="btn btn-secondary" onclick="closeReview()">Cancel</button>
+      <button class="btn btn-danger" onclick="rejectReview()">Reject</button>
+      <button class="btn btn-success" onclick="approveReview()">Approve & Issue Certificate</button>
+    </div>
+  </div>
+</div>
+<!-- Review & Certificate Modal -->
+<div class="modal-backdrop" id="review-modal">
+  <div class="modal-box" style="max-width:600px;">
+    <div class="modal-header">
+      <h3 class="card-title">Review: <span id="review-company"></span></h3>
+      <button class="modal-close" onclick="closeReview()">&times;</button>
+    </div>
+
+    <div style="background:#f8fafc; padding:12px; border-radius:var(--radius-md); margin-bottom:1rem; border:1px solid #e2e8f0;">
+      <strong>Evaluator Score:</strong> <span id="review-score" style="color:var(--primary); font-weight:700;">78 / 100</span><br>
+      <strong>Evaluator:</strong> <span id="review-evaluator">Rahul Mehta</span>
+    </div>
+
+    <div class="form-group">
+      <label class="form-label">CREDENCE Verification ID</label>
+      <input type="text" id="review-verid" class="form-control" readonly>
+    </div>
+
+    <div id="review-qr" style="text-align:center; margin:1rem 0;"></div>
+
+    <div style="display:flex; justify-content:flex-end; gap:10px;">
+      <button class="btn btn-secondary" onclick="closeReview()">Cancel</button>
+      <button class="btn btn-danger" onclick="rejectReview()">Reject</button>
+      <button class="btn btn-success" onclick="approveReview()">Approve & Issue Certificate</button>
+    </div>
+  </div>
+</div>
   </main>
 </div>
 
@@ -124,6 +208,92 @@ document.getElementById('btn-logout')?.addEventListener('click', async function(
   await fetch('<?= base_url('api/logout') ?>', { method: 'POST' });
   window.location.href = '<?= base_url('login') ?>';
 });
+let currentAssignCompany = null;
+
+function openAssignModal(company) {
+  currentAssignCompany = company;
+  document.getElementById('assign-company').textContent = company;
+  document.getElementById('assign-modal').classList.add('active');
+}
+
+function closeAssign() {
+  document.getElementById('assign-modal').classList.remove('active');
+}
+
+function confirmAssign() {
+  const evaluator = document.getElementById('assign-evaluator-select').value;
+  if (!evaluator) {
+    alert('Pehle evaluator select karo');
+    return;
+  }
+  document.getElementById('assigned-eval-demo').textContent = evaluator;
+  alert(evaluator + ' ko assign ho gaya (demo). Backend API baaki hai.');
+  closeAssign();
+}
+function generateVerId() {
+  const year = new Date().getFullYear();
+  const rand = String(Math.floor(Math.random() * 100000)).padStart(5, '0');
+  return `CREDENCE-TD-${year}-${rand}`;
+}
+
+function openReview(company) {
+  document.getElementById('review-company').textContent = company;
+  document.getElementById('review-verid').value = '(Approve karne par generate hoga)';
+  document.getElementById('review-qr').innerHTML = '';
+  document.getElementById('review-modal').classList.add('active');
+}
+
+function closeReview() {
+  document.getElementById('review-modal').classList.remove('active');
+}
+
+function rejectReview() {
+  alert('Application reject ho gayi (demo). Backend API baaki hai.');
+  closeReview();
+}
+
+function approveReview() {
+  const verId = generateVerId();
+  document.getElementById('review-verid').value = verId;
+  document.getElementById('review-qr').innerHTML =
+    '<div style="display:inline-block; padding:12px; background:#fff; border:2px solid var(--primary); border-radius:8px;">' +
+    '<div style="font-size:0.8rem; color:#64748b;">QR Code (demo)</div>' +
+    '<div style="font-family:monospace; font-weight:700; margin-top:6px;">' + verId + '</div>' +
+    '</div>';
+  alert('Certificate issue ho gaya (demo). Backend se Verification ID aur QR generate karna baaki hai.');
+}
+function generateVerId() {
+  const year = new Date().getFullYear();
+  const rand = String(Math.floor(Math.random() * 100000)).padStart(5, '0');
+  return `CREDENCE-TD-${year}-${rand}`;
+}
+
+function openReview(company) {
+  document.getElementById('review-company').textContent = company;
+  document.getElementById('review-verid').value = '(Approve karne par generate hoga)';
+  document.getElementById('review-qr').innerHTML = '';
+  document.getElementById('review-modal').classList.add('active');
+}
+
+function closeReview() {
+  document.getElementById('review-modal').classList.remove('active');
+}
+
+function rejectReview() {
+  alert('Application reject ho gayi (demo). Backend API baaki hai.');
+  closeReview();
+}
+
+function approveReview() {
+  const verId = generateVerId();
+  document.getElementById('review-verid').value = verId;
+  document.getElementById('review-qr').innerHTML =
+    '<div style="display:inline-block; padding:12px; background:#fff; border:2px solid var(--primary); border-radius:8px;">' +
+    '<div style="font-size:0.8rem; color:#64748b;">QR Code (demo)</div>' +
+    '<div style="font-family:monospace; font-weight:700; margin-top:6px;">' + verId + '</div>' +
+    '</div>';
+  alert('Certificate issue ho gaya (demo). Backend se Verification ID aur QR generate karna baaki hai.');
+}
 </script>
 
 </body>

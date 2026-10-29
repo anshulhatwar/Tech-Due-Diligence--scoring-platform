@@ -199,6 +199,7 @@
       <a href="#" class="active">Home</a>
       <a href="#about">About</a>
       <a href="#services">Services</a>
+      <a href="#verify">Verify</a>
       <a href="#contact">Contact Us</a>
     </nav>
     <a href="<?= base_url('login') ?>" class="home-cta-btn">Get Started</a>
@@ -358,6 +359,22 @@
       <a href="<?= base_url('login') ?>" class="hero-btn">Sign Up Now</a>
     </div>
   </section>
+  <!-- ===== VERIFY CERTIFICATE ===== -->
+<section class="verify-section reveal" id="verify">
+  <div class="verify-inner">
+    <div class="section-eyebrow">Public Verification</div>
+    <h2 class="section-title">Verify a <span>Certificate</span></h2>
+    <p class="section-desc">Enter the CREDENCE Verification ID to check authenticity of any certified company.</p>
+
+    <div class="verify-form">
+      <input type="text" id="verify-input" class="form-control" placeholder="e.g. CREDENCE-TD-2026-12345">
+      <button type="button" class="btn btn-primary" id="btn-verify">Verify</button>
+    </div>
+
+    <div id="verify-result" class="verify-result" style="display:none;"></div>
+  </div>
+</section>
+
 
   <!-- ============ CONTACT ============ -->
   <section class="contact-section reveal" id="contact">
@@ -429,10 +446,33 @@ const observer = new IntersectionObserver((entries) => {
       entry.target.classList.add('active');
     }
   });
-}, { threshold: 0.15 });
+}, { threshold: 0.05 });
 
 revealEls.forEach(el => observer.observe(el));
 
+</script>
+<script>
+const demoCertificates = {
+  'CREDENCE-TD-2026-12345': { company: 'Demo Tech Pvt Ltd', industry: 'DeepTech / AI', score: 78, status: 'Active', validUntil: '2027-10-29' }
+};
+
+document.getElementById('btn-verify')?.addEventListener('click', function() {
+  const id = document.getElementById('verify-input').value.trim().toUpperCase();
+  const box = document.getElementById('verify-result');
+  const cert = demoCertificates[id];
+  box.style.display = 'block';
+  if (cert) {
+    box.innerHTML = `
+      <div style="color:var(--primary); font-weight:700; font-size:1.1rem; margin-bottom:8px;">✓ Valid CREDENCE Certificate</div>
+      <p><strong>Company:</strong> ${cert.company}</p>
+      <p><strong>Industry:</strong> ${cert.industry}</p>
+      <p><strong>Assessment Score:</strong> ${cert.score} / 100</p>
+      <p><strong>Status:</strong> ${cert.status}</p>
+      <p><strong>Valid Until:</strong> ${cert.validUntil}</p>`;
+  } else {
+    box.innerHTML = `<div style="color:#dc2626; font-weight:700;">No active CREDENCE certificate found for this ID.</div>`;
+  }
+});
 </script>
 
 </body>

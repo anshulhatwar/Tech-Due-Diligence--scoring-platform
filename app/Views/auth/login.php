@@ -1259,8 +1259,33 @@ document.getElementById('startup-profile-form').addEventListener('submit', async
 
 document.getElementById('forgot-password-link').addEventListener('click', function(e) {
   e.preventDefault();
-  alert('Password reset feature coming soon. Please contact support.');
+  document.getElementById('forgot-modal').classList.add('active');
+  document.getElementById('forgot-step-1').style.display = 'block';
+  document.getElementById('forgot-step-2').style.display = 'none';
 });
+
+function closeForgot() {
+  document.getElementById('forgot-modal').classList.remove('active');
+}
+
+function sendResetCode() {
+  const email = document.getElementById('forgot-email').value.trim();
+  if (!email) { alert('Email daalo'); return; }
+  // Backend API aane par: POST api/forgot-password
+  alert('Reset code bhej diya gaya (demo). Code: 123456');
+  document.getElementById('forgot-step-1').style.display = 'none';
+  document.getElementById('forgot-step-2').style.display = 'block';
+}
+
+function resetPassword() {
+  const code = document.getElementById('forgot-code').value.trim();
+  const pass = document.getElementById('forgot-newpass').value;
+  if (code !== '123456') { alert('Galat code'); return; }
+  if (pass.length < 6) { alert('Password kam se kam 6 characters ka ho'); return; }
+  // Backend API aane par: POST api/reset-password
+  alert('Password reset ho gaya (demo). Ab login karo.');
+  closeForgot();
+}
 </script>
 <!-- 3D Tilt Library (Apple/Glassmorphism feel ke liye) -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/vanilla-tilt/1.8.1/vanilla-tilt.min.js"></script>
@@ -1410,5 +1435,38 @@ document.getElementById('forgot-password-link').addEventListener('click', functi
     });
   });
 </script>
+<!-- Forgot Password Modal -->
+<div class="modal-backdrop" id="forgot-modal">
+  <div class="modal-box" style="max-width:420px;">
+    <div class="modal-header">
+      <h3 class="card-title" id="forgot-title">Forgot Password</h3>
+      <button class="modal-close" onclick="closeForgot()">&times;</button>
+    </div>
+
+    <!-- Step A: email -->
+    <div id="forgot-step-1">
+      <p style="font-size:0.9rem; color:#64748b; margin-bottom:1rem;">Registered email daalo, hum reset code bhejenge.</p>
+      <div class="form-group">
+        <label class="form-label">Email Address</label>
+        <input type="email" id="forgot-email" class="form-control" placeholder="you@company.com">
+      </div>
+      <button class="btn btn-primary" style="width:100%;" onclick="sendResetCode()">Send Reset Code</button>
+    </div>
+
+    <!-- Step B: code + new password -->
+    <div id="forgot-step-2" style="display:none;">
+      <p style="font-size:0.9rem; color:#64748b; margin-bottom:1rem;">Code email pe bheja gaya hai (demo: <strong>123456</strong>).</p>
+      <div class="form-group">
+        <label class="form-label">Reset Code</label>
+        <input type="text" id="forgot-code" class="form-control" placeholder="6-digit code">
+      </div>
+      <div class="form-group">
+        <label class="form-label">New Password</label>
+        <input type="password" id="forgot-newpass" class="form-control" placeholder="Min 6 characters">
+      </div>
+      <button class="btn btn-primary" style="width:100%;" onclick="resetPassword()">Reset Password</button>
+    </div>
+  </div>
+</div>
 </body>
 </html>
