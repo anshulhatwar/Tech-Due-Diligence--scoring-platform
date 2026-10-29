@@ -10,22 +10,36 @@ class Auth extends BaseController
     }
 
     public function dashboard()
-    {
-        return view('dashboard/startup');
+{
+    if (!session()->get('logged_in')) {
+        return redirect()->to(base_url('login'));
     }
+    return view('dashboard/startup', $this->userData());
+}
 
     public function profile()
-    {
-        return view('dashboard/profile');
+{
+    if (!session()->get('logged_in')) {
+        return redirect()->to(base_url('login'));
     }
-    public function documents()
-    {
-        return view('dashboard/documents');
+    return view('dashboard/profile', $this->userData());
+}
+   public function documents()
+{
+    if (!session()->get('logged_in')) {
+        return redirect()->to(base_url('login'));
     }
+    if ($redirect = $this->guardStep('documents')) return $redirect;
+    return view('dashboard/documents', $this->userData());
+}
     public function apply()
-    {
-        return view('dashboard/apply');
+{
+    if (!session()->get('logged_in')) {
+        return redirect()->to(base_url('login'));
     }
+    if ($redirect = $this->guardStep('apply')) return $redirect;
+    return view('dashboard/apply', $this->userData());
+}
     public function adminDashboard()
 {
     return view('admin/dashboard');
@@ -33,6 +47,17 @@ class Auth extends BaseController
 public function adminParams()
 {
     return view('admin/params');
+}
+public function evalDashboard()
+{
+    if (!session()->get('logged_in')) {
+        return redirect()->to(base_url('login'));
+    }
+    $role = session()->get('role');
+    if ($role !== 'Evaluator' && $role !== 'Admin') {
+        return redirect()->to(base_url('login'));
+    }
+    return view('evaluator/dashboard', $this->userData());
 }
 private function getStepStatus(): array
 {
@@ -169,5 +194,15 @@ public function profileSave()
         'status' => true,
         'message' => 'Company profile saved successfully.'
     ]);
+}
+private function userData(): array
+{
+    $name = session()->get('name') ?? 'User';
+    $parts = preg_split('/\s+/', trim($name));
+    $initials = strtoupper(substr($parts[0], 0, 1) . (isset($parts[1]) ? substr($parts[1], 0, 1) : ''));
+    return [
+        'userName' => $name,
+        'userInitials' => $initials ?: 'U',
+    ];
 }
 }

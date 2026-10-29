@@ -45,6 +45,11 @@
             <button class="nav-logout-btn" id="btn-logout" type="button">
                 Logout
             </button>
+      <div class="nav-controls">
+        <!-- User Info -->
+        <div class="nav-user-info">
+          <div class="nav-user-avatar"><?= esc($userInitials ?? 'U') ?></div>
+<span><?= esc($userName ?? 'User') ?></span>
         </div>
 
     </header>

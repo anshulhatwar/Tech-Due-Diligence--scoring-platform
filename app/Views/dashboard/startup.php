@@ -5,7 +5,6 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Startup Dashboard — Credence</title>
   <meta name="description" content="Credence Tech Due-Diligence & Trust Score Platform — Startup Dashboard">
-  <meta name="view-transition" content="same-origin">
   
 
   <!-- Modern Font Stack -->
@@ -41,8 +40,8 @@
       <div class="nav-controls">
         <!-- User Info -->
         <div class="nav-user-info">
-          <div class="nav-user-avatar" id="nav-user-avatar">VS</div>
-          <span id="nav-user-name">Vikram Seth</span>
+         <div class="nav-user-avatar"><?= esc($userInitials ?? 'U') ?></div>
+<span><?= esc($userName ?? 'User') ?></span>
         </div>
 
         <button class="nav-logout-btn" id="btn-logout">Logout</button>
@@ -56,7 +55,7 @@
         <!-- STARTUP LINKS -->
         <div class="role-nav role-startup">
           <div class="sidebar-title">Startup Portal</div>
-          <a class="nav-link active" data-view="startup-dashboard">
+          <a class="nav-link active" href="<?= base_url('dashboard') ?>">
             <svg width="17" height="17" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"></path></svg>
             Dashboard & Status
           </a>
@@ -167,6 +166,32 @@
             </div>
           </div>
 
+          <!-- Evaluation Status Card -->
+          <div class="card" id="evaluation-status-card">
+            <div class="card-header">
+              <h3 class="card-title">Evaluation Status</h3>
+              <span class="badge badge-new" id="eval-status-badge">Not Started</span>
+            </div>
+
+            <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap:1rem; margin-top:0.5rem;">
+              <div>
+                <div style="font-size:0.8rem; color:#64748b; font-weight:600; text-transform:uppercase;">Application</div>
+                <div style="font-weight:700;" id="eval-app-status">Not Submitted</div>
+              </div>
+              <div>
+                <div style="font-size:0.8rem; color:#64748b; font-weight:600; text-transform:uppercase;">Evaluator</div>
+                <div style="font-weight:700;" id="eval-evaluator">Not Assigned</div>
+              </div>
+              <div>
+                <div style="font-size:0.8rem; color:#64748b; font-weight:600; text-transform:uppercase;">Evaluation</div>
+                <div style="font-weight:700;" id="eval-scoring">Pending</div>
+              </div>
+              <div>
+                <div style="font-size:0.8rem; color:#64748b; font-weight:600; text-transform:uppercase;">Final Score</div>
+                <div style="font-weight:700; color:var(--primary);" id="eval-final-score">-- / 100</div>
+              </div>
+            </div>
+          </div>
           <!-- Verification Summary Card (shown once step 8 is complete) -->
           <div class="card" id="st-cert-summary-card" style="border: 2px solid var(--primary); display: none;">
             <div class="card-header">
@@ -238,18 +263,14 @@
   </div>
 
   <!-- Vendor JS Libraries -->
-  <script src="<?= base_url('js/qrcode.min.js') ?>"></script>
-  <script src="<?= base_url('js/chart-custom.js') ?>"></script>
-  <script src="<?= base_url('js/app.js') ?>"></script>
-  <script>
+<script>
+// ===== Count-up animation for metric cards =====
 function animateCount(el, target, duration = 1200) {
   let startTime = null;
   function update(currentTime) {
     if (!startTime) startTime = currentTime;
-    const elapsed = currentTime - startTime;
-    const progress = Math.min(elapsed / duration, 1);
-    const value = Math.floor(progress * target);
-    el.textContent = value;
+    const progress = Math.min((currentTime - startTime) / duration, 1);
+    el.textContent = Math.floor(progress * target);
     if (progress < 1) requestAnimationFrame(update);
     else el.textContent = target;
   }
@@ -260,14 +281,19 @@ document.querySelectorAll('.metric-val').forEach(el => {
   const target = parseInt(el.textContent.replace(/[^0-9]/g, '')) || 0;
   animateCount(el, target);
 });
+
+// ===== Sidebar toggle =====
 document.getElementById('sidebar-toggle')?.addEventListener('click', function() {
-  const sidebar = document.querySelector('.sidebar');
-  sidebar.classList.toggle('collapsed');
+  document.querySelector('.sidebar').classList.toggle('collapsed');
   this.classList.toggle('active');
-  
-  // Button pe chhota bounce effect
   this.style.transform = 'scale(0.85)';
   setTimeout(() => { this.style.transform = 'scale(1)'; }, 150);
+});
+
+// ===== Logout =====
+document.getElementById('btn-logout')?.addEventListener('click', async function() {
+  await fetch('<?= base_url('api/logout') ?>', { method: 'POST' });
+  window.location.href = '<?= base_url('login') ?>';
 });
 </script>
 </body>
