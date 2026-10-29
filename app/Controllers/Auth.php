@@ -40,14 +40,38 @@ class Auth extends BaseController
     if ($redirect = $this->guardStep('apply')) return $redirect;
     return view('dashboard/apply', $this->userData());
 }
-    public function adminDashboard()
+   public function adminDashboard()
 {
-    return view('admin/dashboard');
+if (!session()->get('logged_in')) {
+return redirect()->to(base_url('login'));
 }
+
+
+if (session()->get('role') !== 'Admin') {
+    return redirect()->to(base_url('login'));
+}
+
+return view('admin/dashboard');
+
+
+}
+
 public function adminParams()
 {
-    return view('admin/params');
+if (!session()->get('logged_in')) {
+return redirect()->to(base_url('login'));
 }
+
+
+if (session()->get('role') !== 'Admin') {
+    return redirect()->to(base_url('login'));
+}
+
+return view('admin/params');
+
+
+}
+
 public function evalDashboard()
 {
     if (!session()->get('logged_in')) {
@@ -198,7 +222,7 @@ public function profileSave()
 private function userData(): array
 {
     $name = session()->get('name') ?? 'User';
-    $parts = preg_split('/\s+/', trim($name));
+   $parts = preg_split('/\s+/', trim($name));
     $initials = strtoupper(substr($parts[0], 0, 1) . (isset($parts[1]) ? substr($parts[1], 0, 1) : ''));
     return [
         'userName' => $name,

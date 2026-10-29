@@ -47,3 +47,12 @@ $routes->get('api/documents', 'Document\DocumentController::index');
 $routes->get('api/documents/(:num)', 'Document\DocumentController::show/$1');
 $routes->delete('api/documents/(:num)', 'Document\DocumentController::deleteDocument/$1');
 $routes->put('api/documents/(:num)/status', 'Document\DocumentController::updateStatus/$1');
+
+// =========================
+// ASSESSMENT APPLICATION APIs
+// =========================
+
+$routes->post('api/applications', 'Application\ApplicationController::create');
+$routes->get('api/applications', 'Application\ApplicationController::index');
+$routes->get('api/applications/(:num)', 'Application\ApplicationController::show/$1');
+$routes->get('api/admin/applications', 'Application\ApplicationController::adminIndex');

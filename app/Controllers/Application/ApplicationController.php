@@ -80,7 +80,8 @@ class ApplicationController extends BaseController
                 ->setJSON([
                     'status' => false,
                     'message' => 'Failed to submit assessment application.',
-                    'errors' => $applicationModel->errors()
+                    'errors' => $applicationModel->errors(),
+                    'database_error' => $applicationModel->db->error()
                 ]);
         }
 
@@ -124,6 +125,7 @@ class ApplicationController extends BaseController
 
         return $this->response->setJSON([
             'status' => true,
+            'total' => count($applications),
             'applications' => $applications
         ]);
     }
@@ -163,6 +165,74 @@ class ApplicationController extends BaseController
         return $this->response->setJSON([
             'status' => true,
             'application' => $application
+        ]);
+    }
+
+    // List all applications for Admin dashboard
+    public function adminIndex()
+    {
+        $session = session();
+
+        // Check login
+        if (!$session->get('logged_in')) {
+            return $this->response
+                ->setStatusCode(401)
+                ->setJSON([
+                    'status' => false,
+                    'message' => 'Please login first.'
+                ]);
+        }
+
+        // Check Admin role
+        if ($session->get('role') !== 'Admin') {
+            return $this->response
+                ->setStatusCode(403)
+                ->setJSON([
+                    'status' => false,
+                    'message' => 'Admin access required.'
+                ]);
+        }
+
+        // Fetch all applications with their company names
+        $db = \Config\Database::connect();
+
+        $applications = $db->table('assessment_applications a')
+            ->select(
+                'a.id,
+                a.application_number,
+                a.assessment_type,
+                a.status,
+                a.payment_status,
+                a.created_at,
+                c.name AS company_name'
+            )
+            ->join('companies c', 'c.id = a.company_id', 'left')
+            ->orderBy('a.created_at', 'DESC')
+            ->get()
+            ->getResultArray();
+
+        // Calculate dashboard metrics
+        $totalApplications = count($applications);
+
+        $underReview = 0;
+
+        foreach ($applications as $application) {
+            if (
+                in_array(
+                    strtolower($application['status'] ?? ''),
+                    ['under review', 'in review', 'under_review'],
+                    true
+                )
+            ) {
+                $underReview++;
+            }
+        }
+
+        return $this->response->setJSON([
+            'status' => true,
+            'total' => $totalApplications,
+            'under_review' => $underReview,
+            'applications' => $applications
         ]);
     }
 }
