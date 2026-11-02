@@ -5,6 +5,7 @@ namespace App\Controllers\Application;
 use App\Controllers\BaseController;
 use App\Models\ApplicationModel;
 use App\Models\CompanyModel;
+use App\Models\AssignmentModel;
 
 class ApplicationController extends BaseController
 {
@@ -37,7 +38,7 @@ class ApplicationController extends BaseController
                 ]);
         }
 
-        // Find the logged-in user's company
+        // Find logged-in user's company
         $companyModel = new CompanyModel();
 
         $company = $companyModel
@@ -55,9 +56,10 @@ class ApplicationController extends BaseController
 
         $applicationModel = new ApplicationModel();
 
-        // Generate a unique application number
+        // Generate unique application number
         do {
             $applicationNumber = 'CRD-' . strtoupper(bin2hex(random_bytes(6)));
+
         } while (
             $applicationModel
                 ->where('application_number', $applicationNumber)
@@ -100,7 +102,8 @@ class ApplicationController extends BaseController
             ]);
     }
 
-    // List applications belonging to the logged-in user
+
+    // List applications belonging to logged-in user
     public function index()
     {
         $session = session();
@@ -130,7 +133,8 @@ class ApplicationController extends BaseController
         ]);
     }
 
-    // Show one application belonging to the logged-in user
+
+    // Show one application belonging to logged-in user
     public function show($id)
     {
         $session = session();
@@ -168,12 +172,12 @@ class ApplicationController extends BaseController
         ]);
     }
 
+
     // List all applications for Admin dashboard
     public function adminIndex()
     {
         $session = session();
 
-        // Check login
         if (!$session->get('logged_in')) {
             return $this->response
                 ->setStatusCode(401)
@@ -183,7 +187,6 @@ class ApplicationController extends BaseController
                 ]);
         }
 
-        // Check Admin role
         if ($session->get('role') !== 'Admin') {
             return $this->response
                 ->setStatusCode(403)
@@ -193,27 +196,24 @@ class ApplicationController extends BaseController
                 ]);
         }
 
-        // Fetch all applications with their company names
         $db = \Config\Database::connect();
 
         $applications = $db->table('assessment_applications a')
-            ->select(
-                'a.id,
+            ->select('
+                a.id,
                 a.application_number,
                 a.assessment_type,
                 a.status,
                 a.payment_status,
                 a.created_at,
-                c.name AS company_name'
-            )
+                c.name AS company_name
+            ')
             ->join('companies c', 'c.id = a.company_id', 'left')
             ->orderBy('a.created_at', 'DESC')
             ->get()
             ->getResultArray();
 
-        // Calculate dashboard metrics
         $totalApplications = count($applications);
-
         $underReview = 0;
 
         foreach ($applications as $application) {
@@ -232,6 +232,218 @@ class ApplicationController extends BaseController
             'status' => true,
             'total' => $totalApplications,
             'under_review' => $underReview,
+            'applications' => $applications
+        ]);
+    }
+
+
+    // Get available evaluators for Admin
+    public function evaluators()
+    {
+        $session = session();
+
+        if (!$session->get('logged_in')) {
+            return $this->response
+                ->setStatusCode(401)
+                ->setJSON([
+                    'status' => false,
+                    'message' => 'Please login first.'
+                ]);
+        }
+
+        if ($session->get('role') !== 'Admin') {
+            return $this->response
+                ->setStatusCode(403)
+                ->setJSON([
+                    'status' => false,
+                    'message' => 'Admin access required.'
+                ]);
+        }
+
+        $db = \Config\Database::connect();
+
+        $evaluators = $db->table('users')
+            ->select('ID AS id, Name AS name, Email AS email')
+            ->where('Role', 'Evaluator')
+            ->get()
+            ->getResultArray();
+
+        return $this->response->setJSON([
+            'status' => true,
+            'evaluators' => $evaluators
+        ]);
+    }
+
+
+    // Assign application to an Evaluator
+    public function assignEvaluator()
+    {
+        $session = session();
+
+        if (!$session->get('logged_in')) {
+            return $this->response
+                ->setStatusCode(401)
+                ->setJSON([
+                    'status' => false,
+                    'message' => 'Please login first.'
+                ]);
+        }
+
+        if ($session->get('role') !== 'Admin') {
+            return $this->response
+                ->setStatusCode(403)
+                ->setJSON([
+                    'status' => false,
+                    'message' => 'Admin access required.'
+                ]);
+        }
+
+        $applicationId = (int) $this->request->getPost('application_id');
+        $evaluatorId = (int) $this->request->getPost('evaluator_id');
+
+        if ($applicationId <= 0 || $evaluatorId <= 0) {
+            return $this->response
+                ->setStatusCode(422)
+                ->setJSON([
+                    'status' => false,
+                    'message' => 'Valid application_id and evaluator_id are required.'
+                ]);
+        }
+
+        $db = \Config\Database::connect();
+
+        // Check application exists
+        $application = $db->table('assessment_applications')
+            ->where('id', $applicationId)
+            ->get()
+            ->getRowArray();
+
+        if (!$application) {
+            return $this->response
+                ->setStatusCode(404)
+                ->setJSON([
+                    'status' => false,
+                    'message' => 'Application not found.'
+                ]);
+        }
+
+        // Check selected user is an Evaluator
+        $evaluator = $db->table('users')
+            ->where('ID', $evaluatorId)
+            ->where('Role', 'Evaluator')
+            ->get()
+            ->getRowArray();
+
+        if (!$evaluator) {
+            return $this->response
+                ->setStatusCode(422)
+                ->setJSON([
+                    'status' => false,
+                    'message' => 'Selected user is not an Evaluator.'
+                ]);
+        }
+
+        $assignmentModel = new AssignmentModel();
+
+        // Check existing assignment
+        $existing = $assignmentModel
+            ->where('application_id', $applicationId)
+            ->first();
+
+        $assignmentData = [
+            'application_id' => $applicationId,
+            'evaluator_id' => $evaluatorId,
+            'assigned_by' => (int) $session->get('user_id'),
+            'status' => 'Assigned',
+            'assigned_at' => date('Y-m-d H:i:s')
+        ];
+
+        if ($existing) {
+            $saved = $assignmentModel->update(
+                $existing['id'],
+                $assignmentData
+            );
+        } else {
+            $saved = $assignmentModel->insert($assignmentData);
+        }
+
+        if (!$saved) {
+            return $this->response
+                ->setStatusCode(500)
+                ->setJSON([
+                    'status' => false,
+                    'message' => 'Failed to assign evaluator.',
+                    'errors' => $assignmentModel->errors()
+                ]);
+        }
+
+        return $this->response->setJSON([
+            'status' => true,
+            'message' => 'Evaluator assigned successfully.',
+            'assignment' => [
+                'application_id' => $applicationId,
+                'evaluator_id' => $evaluatorId,
+                'evaluator_name' => $evaluator['Name'],
+                'status' => 'Assigned'
+            ]
+        ]);
+    }
+
+
+    // Get applications assigned to logged-in Evaluator
+    public function assignedApplications()
+    {
+        $session = session();
+
+        if (!$session->get('logged_in')) {
+            return $this->response
+                ->setStatusCode(401)
+                ->setJSON([
+                    'status' => false,
+                    'message' => 'Please login first.'
+                ]);
+        }
+
+        if ($session->get('role') !== 'Evaluator') {
+            return $this->response
+                ->setStatusCode(403)
+                ->setJSON([
+                    'status' => false,
+                    'message' => 'Evaluator access required.'
+                ]);
+        }
+
+        $db = \Config\Database::connect();
+
+        $applications = $db->table('application_assignments aa')
+            ->select('
+                aa.id AS assignment_id,
+                aa.application_id,
+                aa.status AS assignment_status,
+                aa.assigned_at,
+                a.application_number,
+                a.assessment_type,
+                a.status AS application_status,
+                a.payment_status,
+                c.name AS company_name
+            ')
+            ->join(
+                'assessment_applications a',
+                'a.id = aa.application_id'
+            )
+            ->join(
+                'companies c',
+                'c.id = a.company_id',
+                'left'
+            )
+            ->where('aa.evaluator_id', $session->get('user_id'))
+            ->orderBy('aa.assigned_at', 'DESC')
+            ->get()
+            ->getResultArray();
+
+        return $this->response->setJSON([
+            'status' => true,
+            'total' => count($applications),
             'applications' => $applications
         ]);
     }

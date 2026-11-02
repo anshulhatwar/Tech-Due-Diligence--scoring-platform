@@ -9,13 +9,106 @@ class Auth extends BaseController
         return view('auth/login');
     }
 
-    public function dashboard()
+  
+public function dashboard()
 {
     if (!session()->get('logged_in')) {
         return redirect()->to(base_url('login'));
     }
-    return view('dashboard/startup', $this->userData());
+
+    $data = $this->userData();
+    $userId = session()->get('user_id');
+
+    $companyModel = new \App\Models\CompanyModel();
+
+    $company = $companyModel
+        ->where('user_id', $userId)
+        ->first();
+
+    $db = \Config\Database::connect();
+
+    $data['companyName'] = $company['name'] ?? 'My Company';
+    $data['profileCompletion'] = 0;
+    $data['documentsCount'] = 0;
+    $data['workflowStage'] = 2;
+    $data['verificationStatus'] = 'Pending';
+    $data['applicationStatus'] = 'Not Submitted';
+    $data['evaluatorName'] = 'Not Assigned';
+    $data['evaluationStatus'] = 'Pending';
+    $data['finalScore'] = '-- / 100';
+    $data['documents'] = [];
+
+    if ($company) {
+        $fields = [
+            'name',
+            'founder_details',
+            'contact_email',
+            'contact_phone',
+            'website',
+            'industry',
+            'location',
+            'year_established',
+            'team_size',
+            'company_description',
+            'problem_statement',
+            'product_service',
+            'business_model',
+            'usp',
+            'technology_used',
+            'intellectual_property'
+        ];
+
+        $completed = 0;
+
+        foreach ($fields as $field) {
+            if (!empty($company[$field])) {
+                $completed++;
+            }
+        }
+
+        $data['profileCompletion'] = (int) round(
+            ($completed / count($fields)) * 100
+        );
+
+        if ($db->tableExists('documents')) {
+            $documents = $db->table('documents')
+                ->where('user_id', $userId)
+                ->orderBy('id', 'DESC')
+                ->get()
+                ->getResultArray();
+
+            $data['documents'] = $documents;
+            $data['documentsCount'] = count($documents);
+        }
+
+        if ($db->tableExists('assessment_applications')) {
+            $application = $db->table('assessment_applications')
+                ->where('user_id', $userId)
+                ->orderBy('id', 'DESC')
+                ->get()
+                ->getRowArray();
+
+            if ($application) {
+                $data['applicationStatus'] =
+                    $application['status'] ?? 'Submitted';
+
+                $data['evaluationStatus'] =
+                    $application['status'] ?? 'Pending';
+
+                $data['workflowStage'] = 4;
+
+                $data['verificationStatus'] =
+                    ($application['status'] ?? '') === 'Certified'
+                        ? 'Verified'
+                        : 'Pending';
+            }
+        }
+    }
+
+    return view('dashboard/startup', $data);
 }
+
+
 
     public function profile()
 {
@@ -222,7 +315,7 @@ public function profileSave()
 private function userData(): array
 {
     $name = session()->get('name') ?? 'User';
-   $parts = preg_split('/\s+/', trim($name));
+    $parts = preg_split('/\s+/', trim($name));
     $initials = strtoupper(substr($parts[0], 0, 1) . (isset($parts[1]) ? substr($parts[1], 0, 1) : ''));
     return [
         'userName' => $name,

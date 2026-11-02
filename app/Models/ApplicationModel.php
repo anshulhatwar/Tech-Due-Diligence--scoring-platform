@@ -4,19 +4,17 @@ namespace App\Models;
 
 use CodeIgniter\Model;
 
-class ApplicationModel extends Model
+class AssignmentModel extends Model
 {
-    protected $table = 'assessment_applications';
+    protected $table = 'application_assignments';
     protected $primaryKey = 'id';
 
     protected $allowedFields = [
-        'user_id',
-        'company_id',
-        'application_number',
-        'assessment_type',
+        'application_id',
+        'evaluator_id',
+        'assigned_by',
         'status',
-        'payment_status',
-        'submitted_at'
+        'assigned_at'
     ];
 
     protected $useTimestamps = false;
