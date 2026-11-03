@@ -10,14 +10,12 @@
     <meta name="description"
           content="Credence Tech Due-Diligence & Trust Score Platform — Startup Dashboard">
 
-    <!-- Modern Font Stack -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Outfit:wght@500;600;700;800&display=swap"
           rel="stylesheet">
 
-    <!-- Design System -->
     <link rel="stylesheet" href="<?= base_url('css/style.css') ?>">
 </head>
 
@@ -74,7 +72,9 @@
 
                 </div>
 
-                <button class="nav-logout-btn" id="btn-logout" type="button">
+                <button class="nav-logout-btn"
+                        id="btn-logout"
+                        type="button">
                     Logout
                 </button>
 
@@ -374,7 +374,6 @@
 
                         <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:1rem;margin-top:0.5rem;">
 
-                            <!-- Application -->
                             <div>
 
                                 <div style="font-size:0.8rem;color:#64748b;font-weight:600;text-transform:uppercase;">
@@ -387,7 +386,6 @@
 
                             </div>
 
-                            <!-- Evaluator -->
                             <div>
 
                                 <div style="font-size:0.8rem;color:#64748b;font-weight:600;text-transform:uppercase;">
@@ -400,7 +398,6 @@
 
                             </div>
 
-                            <!-- Evaluation -->
                             <div>
 
                                 <div style="font-size:0.8rem;color:#64748b;font-weight:600;text-transform:uppercase;">
@@ -413,7 +410,6 @@
 
                             </div>
 
-                            <!-- Final Score -->
                             <div>
 
                                 <div style="font-size:0.8rem;color:#64748b;font-weight:600;text-transform:uppercase;">
@@ -422,6 +418,131 @@
 
                                 <div style="font-weight:700;color:var(--primary);" id="eval-final-score">
                                     <?= esc($finalScore ?? '-- / 100') ?>
+                                </div>
+
+                            </div>
+
+                        </div>
+
+                    </div>
+
+                    <!-- Verified Directory Card -->
+                    <div class="card" id="directory-card">
+
+                        <div class="card-header">
+
+                            <h3 class="card-title">
+                                Verified Directory
+                            </h3>
+
+                            <span class="badge badge-active">
+                                Public
+                            </span>
+
+                        </div>
+
+                        <div style="display:flex;gap:10px;flex-wrap:wrap;margin-bottom:1rem;">
+
+                            <input type="text"
+                                   id="dir-search"
+                                   class="form-control"
+                                   placeholder="Search by company name..."
+                                   style="flex:1;min-width:200px;">
+
+                            <select id="dir-industry"
+                                    class="form-select"
+                                    style="width:220px;">
+
+                                <option value="">All Industries</option>
+                                <option value="DeepTech / AI">DeepTech / AI</option>
+                                <option value="FinTech">FinTech</option>
+                                <option value="HealthTech / MedTech">HealthTech / MedTech</option>
+
+                            </select>
+
+                        </div>
+
+                        <div class="table-responsive">
+
+                            <table class="custom-table">
+
+                                <thead>
+                                    <tr>
+                                        <th>Company</th>
+                                        <th>Industry</th>
+                                        <th>Score</th>
+                                        <th>Verification ID</th>
+                                        <th>Status</th>
+                                    </tr>
+                                </thead>
+
+                                <tbody id="dir-body"></tbody>
+
+                            </table>
+
+                        </div>
+
+                        <div id="dir-empty" class="empty-state">
+
+                            <div class="empty-state-icon">🔍</div>
+
+                            <h3>No Verified Companies Found</h3>
+
+                            <p>
+                                Approved companies will appear here.
+                            </p>
+
+                        </div>
+
+                    </div>
+
+                    <!-- Certificate Card -->
+                    <div class="card"
+                         id="certificate-card"
+                         style="display:none;border:2px solid var(--primary);">
+
+                        <div class="card-header">
+
+                            <h3 class="card-title" style="color:var(--primary);">
+                                Certificate Issued
+                            </h3>
+
+                            <span class="badge badge-active">
+                                Active
+                            </span>
+
+                        </div>
+
+                        <div style="display:grid;grid-template-columns:1fr auto;gap:2rem;align-items:center;">
+
+                            <div>
+
+                                <div style="font-size:0.8rem;color:#64748b;font-weight:600;text-transform:uppercase;">
+                                    Verification ID
+                                </div>
+
+                                <div style="font-family:monospace;font-size:1.4rem;font-weight:700;color:var(--primary);"
+                                     id="cert-ver-id">
+                                    --
+                                </div>
+
+                                <p style="font-size:0.9rem;color:#334155;margin-top:10px;">
+                                    Your Credence Trust Score certificate has been approved.
+                                    This verification ID and QR code will be used for public verification.
+                                </p>
+
+                            </div>
+
+                            <div id="cert-qr"
+                                 style="padding:12px;background:#fff;border:2px solid var(--primary);border-radius:8px;text-align:center;">
+
+                                <div style="font-size:0.8rem;color:#64748b;">
+                                    QR Code
+                                </div>
+
+                                <div style="font-weight:700;font-family:monospace;"
+                                     id="cert-qr-text">
+                                    --
                                 </div>
 
                             </div>
@@ -570,6 +691,7 @@
                                                 </td>
 
                                                 <td>
+
                                                     <?php
                                                     $submittedDate =
                                                         $document['uploaded_at']
@@ -580,15 +702,19 @@
                                                     <?= $submittedDate
                                                         ? esc(date('d M Y', strtotime($submittedDate)))
                                                         : '—' ?>
+
                                                 </td>
 
                                                 <td>
+
                                                     <span class="badge badge-new">
                                                         <?= esc($document['status'] ?? 'Pending') ?>
                                                     </span>
+
                                                 </td>
 
                                                 <td>
+
                                                     <?php if (!empty($document['file_path'])): ?>
 
                                                         <a href="<?= base_url($document['file_path']) ?>"
@@ -603,6 +729,7 @@
                                                         <span>—</span>
 
                                                     <?php endif; ?>
+
                                                 </td>
 
                                             </tr>
@@ -655,9 +782,6 @@
     <script>
 
         // Animate only numeric metric values.
-        // This prevents status text such as "Pending" or "Step 4/8"
-        // from being replaced with incorrect numbers.
-
         function animateCount(el, target, duration = 1200) {
 
             let startTime = null;
@@ -687,11 +811,12 @@
 
         }
 
+
+        // Animate percentage metrics only.
         document.querySelectorAll('.metric-val').forEach(function (el) {
 
             const originalText = el.textContent.trim();
 
-            // Animate only plain numbers and percentages.
             if (/^\d+%$/.test(originalText)) {
 
                 const target = parseInt(originalText, 10);
@@ -743,6 +868,53 @@
                 window.location.href = '<?= base_url('login') ?>';
 
             });
+
+
+        // Certificate Card
+        function showCertificate(verId) {
+
+            if (!verId) {
+                return;
+            }
+
+            document.getElementById('cert-ver-id').textContent = verId;
+
+            document.getElementById('cert-qr-text').textContent = verId;
+
+            document.getElementById('certificate-card').style.display = 'block';
+
+        }
+
+
+        // Verified Directory
+        function renderDirectory() {
+
+            const searchInput = document.getElementById('dir-search');
+            const industrySelect = document.getElementById('dir-industry');
+            const directoryBody = document.getElementById('dir-body');
+            const emptyMessage = document.getElementById('dir-empty');
+
+            if (!searchInput || !industrySelect || !directoryBody || !emptyMessage) {
+                return;
+            }
+
+            // Real verified-company API will be connected here.
+            directoryBody.innerHTML = '';
+
+            emptyMessage.style.display = 'block';
+
+        }
+
+
+        document.getElementById('dir-search')
+            ?.addEventListener('input', renderDirectory);
+
+        document.getElementById('dir-industry')
+            ?.addEventListener('change', renderDirectory);
+
+
+        // Initialize Directory
+        renderDirectory();
 
     </script>
 

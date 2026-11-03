@@ -110,39 +110,144 @@
     </div>
 
     <div class="card">
+<div class="card-header">
+    <h3 class="card-title">Applications Pipeline</h3>
+    <button type="button" id="refresh-applications">Refresh</button>
+</div>
 
-        <div class="card-header">
-            <h3 class="card-title">Applications Pipeline</h3>
-            <button type="button" id="refresh-applications">Refresh</button>
+<div class="table-responsive">
+    <table class="custom-table">
+        <thead>
+            <tr>
+                <th>Company</th>
+                <th>Application Number</th>
+                <th>Assessment Type</th>
+                <th>Status</th>
+                <th>Payment</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+
+        <tbody id="applications-table">
+            <tr>
+                <td colspan="6" style="text-align:center;color:#64748b;">
+                    Loading applications...
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+
+</div>
+
+<!-- Assign Evaluator Modal -->
+<div class="modal-backdrop" id="assign-modal">
+    <div class="modal-box">
+
+        <div class="modal-header">
+            <h3 class="card-title">
+                Assign Evaluator to
+                <span id="assign-company"></span>
+            </h3>
+
+            <button class="modal-close" onclick="closeAssign()">
+                &times;
+            </button>
         </div>
 
-        <div class="table-responsive">
-            <table class="custom-table">
-                <thead>
-                    <tr>
-                        <th>Company</th>
-                        <th>Application Number</th>
-                        <th>Assessment Type</th>
-                        <th>Status</th>
-                        <th>Payment</th>
-                        <th>Actions</th>
-                    </tr>
-                </thead>
+        <div class="form-group">
+            <label class="form-label">
+                Select Qualified Evaluator
+            </label>
 
-                <tbody id="applications-table">
-                    <tr>
-                        <td colspan="6" style="text-align:center;color:#64748b;">
-                            Loading applications...
-                        </td>
-                    </tr>
-                </tbody>
-            </table>
+            <select id="assign-evaluator-select" class="form-select">
+                <option value="">-- Select Evaluator --</option>
+            </select>
+        </div>
+
+        <div style="display:flex; justify-content:flex-end; gap:10px; margin-top:1rem;">
+
+            <button class="btn btn-secondary" onclick="closeAssign()">
+                Cancel
+            </button>
+
+            <button class="btn btn-primary" onclick="confirmAssign()">
+                Assign & Notify Evaluator
+            </button>
+
         </div>
 
     </div>
+</div>
+
+<!-- Review & Certificate Modal -->
+<div class="modal-backdrop" id="review-modal">
+    <div class="modal-box" style="max-width:600px;">
+
+        <div class="modal-header">
+            <h3 class="card-title">
+                Review:
+                <span id="review-company"></span>
+            </h3>
+
+            <button class="modal-close" onclick="closeReview()">
+                &times;
+            </button>
+        </div>
+
+        <div style="background:#f8fafc; padding:12px; border-radius:var(--radius-md); margin-bottom:1rem; border:1px solid #e2e8f0;">
+
+            <strong>Evaluator Score:</strong>
+
+            <span id="review-score" style="color:var(--primary); font-weight:700;">
+                --
+            </span>
+
+            <br>
+
+            <strong>Evaluator:</strong>
+
+            <span id="review-evaluator">
+                --
+            </span>
+
+        </div>
+
+        <div class="form-group">
+            <label class="form-label">
+                CREDENCE Verification ID
+            </label>
+
+            <input
+                type="text"
+                id="review-verid"
+                class="form-control"
+                readonly
+            >
+        </div>
+
+        <div id="review-qr" style="text-align:center; margin:1rem 0;"></div>
+
+        <div style="display:flex; justify-content:flex-end; gap:10px;">
+
+            <button class="btn btn-secondary" onclick="closeReview()">
+                Cancel
+            </button>
+
+            <button class="btn btn-danger" onclick="rejectReview()">
+                Reject
+            </button>
+
+            <button class="btn btn-success" onclick="approveReview()">
+                Approve & Issue Certificate
+            </button>
+
+        </div>
+
+    </div>
+</div>
 
 </main>
-```
 
 </div>
 
@@ -278,8 +383,7 @@ document.getElementById('applications-table').addEventListener('click', function
         '\nPayment: ' + row.cells[4].textContent
     );
 });
-
-document.getElementById('refresh-applications').addEventListener('click', loadApplications);
+document.getElementById('refresh-applications')?.addEventListener('click', loadApplications);
 
 document.getElementById('btn-logout')?.addEventListener('click', async function () {
     try {

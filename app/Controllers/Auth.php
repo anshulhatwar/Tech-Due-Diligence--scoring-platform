@@ -322,4 +322,8 @@ private function userData(): array
         'userInitials' => $initials ?: 'U',
     ];
 }
+public function verify()
+{
+    return view('public/verify');
+}
 }

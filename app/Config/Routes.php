@@ -19,6 +19,7 @@ $routes->get('/apply', 'Auth::apply');
 $routes->get('/admin', 'Auth::adminDashboard');
 $routes->get('/admin/params', 'Auth::adminParams');
 $routes->get('/eval', 'Auth::evalDashboard');
+$routes->get('/verify', 'Auth::verify');
 
 
 // =========================
