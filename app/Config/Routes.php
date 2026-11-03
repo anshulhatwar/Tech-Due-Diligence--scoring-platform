@@ -56,7 +56,7 @@ $routes->post('api/applications', 'Application\ApplicationController::create');
 $routes->get('api/applications', 'Application\ApplicationController::index');
 $routes->get('api/applications/(:num)', 'Application\ApplicationController::show/$1');
 $routes->get('api/admin/applications', 'Application\ApplicationController::adminIndex');
-
+$routes->get('api/admin/evaluations/(:num)', 'Evaluation\EvaluationController::review/$1');
 // =========================
 // EVALUATOR ASSIGNMENT APIs
 // =========================
@@ -85,4 +85,9 @@ $routes->get(
 $routes->post(
     'api/evaluator/submit',
     'Evaluation\EvaluationController::submit'
+);
+
+$routes->post(
+    'api/admin/evaluations/decision',
+    'Evaluation\EvaluationController::approveReject'
 );
