@@ -10,6 +10,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Outfit:wght@500;600;700;800&display=swap" rel="stylesheet">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
 
   <!-- Design System & Styles -->
   <link rel="stylesheet" href="<?= base_url('css/style.css') ?>">
@@ -453,7 +454,7 @@ revealEls.forEach(el => observer.observe(el));
 </script>
 <script>
 const demoCertificates = {
-  'CREDENCE-TD-2026-12345': { company: 'Demo Tech Pvt Ltd', industry: 'DeepTech / AI', score: 78, status: 'Active', validUntil: '2027-10-29' }
+  'CREDENCE-TD-2026-12345': { company: 'Demo Tech Pvt Ltd', industry: 'DeepTech / AI', score: 78, status: 'Approved', validUntil: '2027-10-29' }
 };
 
 document.getElementById('btn-verify')?.addEventListener('click', function() {
@@ -463,16 +464,45 @@ document.getElementById('btn-verify')?.addEventListener('click', function() {
   box.style.display = 'block';
   if (cert) {
     box.innerHTML = `
-      <div style="color:var(--primary); font-weight:700; font-size:1.1rem; margin-bottom:8px;">✓ Valid CREDENCE Certificate</div>
+  <div style="display:flex; gap:24px; align-items:center; flex-wrap:wrap;">
+    <div style="flex:1; min-width:220px;">
+      <div style="display:flex; align-items:center; gap:12px; margin-bottom:12px;">
+        <div style="width:56px; height:56px; border-radius:50%; background:var(--primary); color:#fff; display:flex; align-items:center; justify-content:center; font-size:1.6rem; font-weight:800;">✓</div>
+        <div>
+          <div style="font-weight:800; font-size:1.1rem; color:var(--primary);">APPROVED — Valid CREDENCE Certificate</div>
+          <div style="font-size:0.85rem; color:#64748b;">Verified by CREDENCE</div>
+        </div>
+      </div>
       <p><strong>Company:</strong> ${cert.company}</p>
       <p><strong>Industry:</strong> ${cert.industry}</p>
-      <p><strong>Assessment Score:</strong> ${cert.score} / 100</p>
+      <p><strong>Trust Score:</strong> <span style="font-size:1.3rem; font-weight:800; color:var(--primary);">${cert.score} / 100</span></p>
       <p><strong>Status:</strong> ${cert.status}</p>
-      <p><strong>Valid Until:</strong> ${cert.validUntil}</p>`;
+      <p><strong>Valid Until:</strong> ${cert.validUntil}</p>
+    </div>
+    <div style="text-align:center; padding:12px; background:#fff; border:2px solid var(--primary); border-radius:12px;">
+      <div id="verify-qr-box"></div>
+      <div style="font-family:monospace; font-size:0.8rem; font-weight:700; margin-top:6px;">${id}</div>
+      <div style="font-size:0.72rem; color:#64748b;">Scan to verify</div>
+    </div>
+  </div>`;
+
+new QRCode(document.getElementById('verify-qr-box'), {
+  text: 'http://localhost:8080/verify?id=' + verId,
+  width: 120, height: 120,
+  colorDark: '#0F6E5C', colorLight: '#ffffff'
+});
   } else {
     box.innerHTML = `<div style="color:#dc2626; font-weight:700;">No active CREDENCE certificate found for this ID.</div>`;
   }
 });
+// ===== Auto-fill verification ID from QR link (?id=...) =====
+const params = new URLSearchParams(window.location.search);
+const qrId = params.get('id');
+if (qrId) {
+  document.getElementById('verify-input').value = qrId;
+  document.getElementById('verify').scrollIntoView({ behavior: 'smooth' });
+  document.getElementById('btn-verify').click();
+}
 </script>
 
 </body>

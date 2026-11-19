@@ -119,4 +119,9 @@ public function verify()
 {
     return view('public/verify');
 }
+public function profileComplete()
+{
+    $this->setStepComplete('profile');
+    return $this->response->setJSON(['status' => true]);
+}
 }

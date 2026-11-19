@@ -6,6 +6,7 @@
   <title>CREDENCE Admin Dashboard</title>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Outfit:wght@500;600;700;800&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="<?= base_url('css/style.css') ?>">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
 </head>
 <body>
 
@@ -131,8 +132,6 @@
       <select id="assign-evaluator-select" class="form-select">
         <option value="">-- Select Evaluator --</option>
         <option value="Anshul ">Anshul  (DeepTech / AI)</option>
-        <option value="Madhur">Madhur (FinTech)</option>
-        <option value="Aryan">Aryan (HealthTech)</option>
       </select>
     </div>
     <div style="display:flex; justify-content:flex-end; gap:10px; margin-top:1rem;">
@@ -150,35 +149,8 @@
     </div>
 
     <div style="background:#f8fafc; padding:12px; border-radius:var(--radius-md); margin-bottom:1rem; border:1px solid #e2e8f0;">
-      <strong>Evaluator Score:</strong> <span id="review-score" style="color:var(--primary); font-weight:700;">78 / 100</span><br>
+      <strong>Evaluator Score:</strong> <span id="review-score" style="color:var(--primary); font-weight:700;">76 / 100</span><br>
       <strong>Evaluator:</strong> <span id="review-evaluator">Anshul</span>
-    </div>
-
-    <div class="form-group">
-      <label class="form-label">CREDENCE Verification ID</label>
-      <input type="text" id="review-verid" class="form-control" readonly>
-    </div>
-
-    <div id="review-qr" style="text-align:center; margin:1rem 0;"></div>
-
-    <div style="display:flex; justify-content:flex-end; gap:10px;">
-      <button class="btn btn-secondary" onclick="closeReview()">Cancel</button>
-      <button class="btn btn-danger" onclick="rejectReview()">Reject</button>
-      <button class="btn btn-success" onclick="approveReview()">Approve & Issue Certificate</button>
-    </div>
-  </div>
-</div>
-<!-- Review & Certificate Modal -->
-<div class="modal-backdrop" id="review-modal">
-  <div class="modal-box" style="max-width:600px;">
-    <div class="modal-header">
-      <h3 class="card-title">Review: <span id="review-company"></span></h3>
-      <button class="modal-close" onclick="closeReview()">&times;</button>
-    </div>
-
-    <div style="background:#f8fafc; padding:12px; border-radius:var(--radius-md); margin-bottom:1rem; border:1px solid #e2e8f0;">
-      <strong>Evaluator Score:</strong> <span id="review-score" style="color:var(--primary); font-weight:700;">78 / 100</span><br>
-      <strong>Evaluator:</strong> <span id="review-evaluator">Rahul Mehta</span>
     </div>
 
     <div class="form-group">
@@ -199,6 +171,10 @@
 </div>
 
 <script>
+const MIN_APPROVAL_SCORE = 75;
+const approvedIds = new Set();
+const approvedData = {};
+
 document.getElementById('sidebar-toggle')?.addEventListener('click', function() {
   document.querySelector('.sidebar').classList.toggle('collapsed');
   this.classList.toggle('active');
@@ -208,10 +184,9 @@ document.getElementById('btn-logout')?.addEventListener('click', async function(
   await fetch('<?= base_url('api/logout') ?>', { method: 'POST' });
   window.location.href = '<?= base_url('login') ?>';
 });
-let currentAssignCompany = null;
 
+// ===== Assign Evaluator =====
 function openAssignModal(company) {
-  currentAssignCompany = company;
   document.getElementById('assign-company').textContent = company;
   document.getElementById('assign-modal').classList.add('active');
 }
@@ -230,6 +205,8 @@ function confirmAssign() {
   alert(evaluator + ' ko assign ho gaya (demo). Backend API baaki hai.');
   closeAssign();
 }
+
+// ===== Review & Certificate =====
 function generateVerId() {
   const year = new Date().getFullYear();
   const rand = String(Math.floor(Math.random() * 100000)).padStart(5, '0');
@@ -253,46 +230,30 @@ function rejectReview() {
 }
 
 function approveReview() {
+  const score = parseInt(document.getElementById('review-score').textContent) || 0;
+  if (score < MIN_APPROVAL_SCORE) {
+    alert('Score ' + score + ' hai, minimum ' + MIN_APPROVAL_SCORE + ' chahiye. Approve nahi ho sakta.');
+    return;
+  }
+
   const verId = generateVerId();
+  approvedIds.add(verId);
+  approvedData[verId] = {
+    company: document.getElementById('review-company').textContent,
+    score: score,
+    issued: new Date().toISOString().slice(0, 10)
+  };
   document.getElementById('review-verid').value = verId;
-  document.getElementById('review-qr').innerHTML =
-    '<div style="display:inline-block; padding:12px; background:#fff; border:2px solid var(--primary); border-radius:8px;">' +
-    '<div style="font-size:0.8rem; color:#64748b;">QR Code (demo)</div>' +
-    '<div style="font-family:monospace; font-weight:700; margin-top:6px;">' + verId + '</div>' +
-    '</div>';
-  alert('Certificate issue ho gaya (demo). Backend se Verification ID aur QR generate karna baaki hai.');
-}
-function generateVerId() {
-  const year = new Date().getFullYear();
-  const rand = String(Math.floor(Math.random() * 100000)).padStart(5, '0');
-  return `CREDENCE-TD-${year}-${rand}`;
-}
 
-function openReview(company) {
-  document.getElementById('review-company').textContent = company;
-  document.getElementById('review-verid').value = '(Approve karne par generate hoga)';
-  document.getElementById('review-qr').innerHTML = '';
-  document.getElementById('review-modal').classList.add('active');
-}
+  const box = document.getElementById('review-qr');
+  box.innerHTML = '';
+  new QRCode(box, {
+    text: 'http://localhost:8080/verify?id=' + verId,
+    width: 120, height: 120,
+    colorDark: '#0F6E5C', colorLight: '#ffffff'
+  });
 
-function closeReview() {
-  document.getElementById('review-modal').classList.remove('active');
-}
-
-function rejectReview() {
-  alert('Application reject ho gayi (demo). Backend API baaki hai.');
-  closeReview();
-}
-
-function approveReview() {
-  const verId = generateVerId();
-  document.getElementById('review-verid').value = verId;
-  document.getElementById('review-qr').innerHTML =
-    '<div style="display:inline-block; padding:12px; background:#fff; border:2px solid var(--primary); border-radius:8px;">' +
-    '<div style="font-size:0.8rem; color:#64748b;">QR Code (demo)</div>' +
-    '<div style="font-family:monospace; font-weight:700; margin-top:6px;">' + verId + '</div>' +
-    '</div>';
-  alert('Certificate issue ho gaya (demo). Backend se Verification ID aur QR generate karna baaki hai.');
+  alert('Certificate approve ho gaya. Score: ' + score);
 }
 </script>
 

@@ -5,6 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Startup Dashboard — Credence</title>
   <meta name="description" content="Credence Tech Due-Diligence & Trust Score Platform — Startup Dashboard">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
   
 
   <!-- Modern Font Stack -->
@@ -71,6 +72,26 @@
             <svg width="17" height="17" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
             Assessment Application
           </a>
+          <a class="nav-link locked" data-step="5" href="javascript:void(0)">
+  <svg width="17" height="17" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path></svg>
+  <span> Evaluator Assignment</span>
+  <small class="nav-sub" id="side-st5">Locked</small>
+</a>
+<a class="nav-link locked" data-step="6" href="javascript:void(0)">
+  <svg width="17" height="17" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path></svg>
+  <span> Evaluation & Scoring</span>
+  <small class="nav-sub" id="side-st6">Locked</small>
+</a>
+<a class="nav-link locked" data-step="7" href="javascript:void(0)">
+  <svg width="17" height="17" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path></svg>
+  <span> Credence Review</span>
+  <small class="nav-sub" id="side-st7">Locked</small>
+</a>
+<a class="nav-link locked" data-step="8" href="javascript:void(0)">
+  <svg width="17" height="17" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path></svg>
+  <span> Certification & QR</span>
+  <small class="nav-sub" id="side-st8">Locked</small>
+</a>
         </div>
 
         <div style="margin-top: auto; padding-top: 1.5rem; border-top: 1px solid var(--light-border);">
@@ -165,6 +186,7 @@
               </div>
             </div>
           </div>
+          
 
           <!-- Evaluation Status Card -->
           <div class="card" id="evaluation-status-card">
@@ -268,6 +290,7 @@
 <div class="card" id="certificate-card" style="display:none; border:2px solid var(--primary);">
   <div class="card-header">
     <h3 class="card-title" style="color:var(--primary);">Certificate Issued</h3>
+    <div style="display:inline-block; padding:6px 14px; border:2px solid var(--primary); color:var(--primary); border-radius:999px; font-weight:800; letter-spacing:0.05em; text-transform:uppercase; font-size:0.8rem; margin-bottom:10px;">✓ Approved by CREDENCE</div>
     <span class="badge badge-active">Active</span>
   </div>
 
@@ -275,14 +298,16 @@
     <div>
       <div style="font-size:0.8rem; color:#64748b; font-weight:600; text-transform:uppercase;">Verification ID</div>
       <div style="font-family:monospace; font-size:1.4rem; font-weight:700; color:var(--primary);" id="cert-ver-id">--</div>
+      <div style="font-size:0.8rem; color:#64748b; font-weight:600; text-transform:uppercase; margin-top:10px;">Trust Score</div>
+<div style="font-family:'Outfit',sans-serif; font-size:1.8rem; font-weight:800; color:var(--primary);" id="cert-score">-- / 100</div>
       <p style="font-size:0.9rem; color:#334155; margin-top:10px;">
         Your Credence Trust Score certificate has been approved. This verification ID and QR code will be used for public verification.
       </p>
     </div>
     <div id="cert-qr" style="padding:12px; background:#fff; border:2px solid var(--primary); border-radius:8px; text-align:center;">
-      <div style="font-size:0.8rem; color:#64748b;">QR Code</div>
-      <div style="font-weight:700; font-family:monospace;" id="cert-qr-text">--</div>
-    </div>
+  <div id="cert-qr-canvas"></div>
+  <div style="font-weight:700; font-family:monospace; font-size:0.85rem; margin-top:6px;" id="cert-qr-text">--</div>
+</div>
   </div>
 </div>
 
@@ -352,10 +377,22 @@ document.getElementById('btn-logout')?.addEventListener('click', async function(
   await fetch('<?= base_url('api/logout') ?>', { method: 'POST' });
   window.location.href = '<?= base_url('login') ?>';
 });
-// ===== Certificate card (demo) =====
-function showCertificate(verId) {
+function showCertificate(verId, score) {
   document.getElementById('cert-ver-id').textContent = verId;
+  document.getElementById('cert-score').textContent = score + ' / 100';
+ document.getElementById('cert-score').textContent = (score ?? '--') + ' / 100';
   document.getElementById('cert-qr-text').textContent = verId;
+
+  const box = document.getElementById('cert-qr-canvas');
+  box.innerHTML = '';
+  new QRCode(box, {
+   text: 'http://localhost:8080/verify?id=' + verId, // production me real domain
+    width: 120,
+    height: 120,
+    colorDark: '#0F6E5C',
+    colorLight: '#ffffff'
+  });
+
   document.getElementById('certificate-card').style.display = 'block';
 }
 // ===== Verified Directory (demo data) =====
@@ -385,6 +422,20 @@ function renderDirectory() {
 document.getElementById('dir-search').addEventListener('input', renderDirectory);
 document.getElementById('dir-industry').addEventListener('change', renderDirectory);
 renderDirectory();
+// Backend status aane par sidebar ka sub-text aur class update karo
+function setSidebarStatus(s) {
+  const update = (step, text, cls) => {
+    const link = document.querySelector(`.sidebar .nav-link[data-step="${step}"]`);
+    link.className = 'nav-link ' + cls;
+    document.getElementById('side-st' + step).textContent = text;
+  };
+  update(, s.evaluator ? 'Assigned: ' + s.evaluator : 'Locked', s.evaluator ? 'done' : 'locked');
+  update(, s.evaluationStatus === 'Completed' ? 'Score: ' + s.finalScore : (s.evaluationStatus || 'Locked'), s.evaluationStatus === 'Completed' ? 'done' : (s.evaluator ? 'active-step' : 'locked'));
+  update(, s.reviewStatus || 'Locked', s.reviewStatus === 'Approved' || s.reviewStatus === 'Rejected' ? 'done' : (s.evaluationStatus === 'Completed' ? 'active-step' : 'locked'));
+  update(, s.certificate === 'Available' ? 'Available' : 'Locked', s.certificate === 'Available' ? 'done' : 'locked');
+}
+
+// Test (console me): setSidebarStatus({ evaluator: 'Rahul Mehta', evaluationStatus: 'In Progress' })
 </script>
 </body>
 </html>
