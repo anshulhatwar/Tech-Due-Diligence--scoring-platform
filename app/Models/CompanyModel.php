@@ -9,26 +9,27 @@ class CompanyModel extends Model
     protected $table = 'companies';
     protected $primaryKey = 'id';
 
-    protected $allowedFields = [
-        'user_id',
-        'name',
-        'founder_details',
-        'contact_email',
-        'contact_phone',
-        'website',
-        'industry',
-        'stage',
-        'location',
-        'year_established',
-        'team_size',
-        'company_description',
-        'problem_statement',
-        'product_service',
-        'business_model',
-        'usp',
-        'technology_used',
-        'intellectual_property'
-    ];
+   protected $allowedFields = [
+    'user_id',
+    'name',
+    'founder_details',
+    'contact_email',
+    'contact_phone',
+    'website',
+    'industry',
+    'stage',
+    'location',
+    'year_established',
+    'team_size',
+    'company_description',
+    'problem_statement',
+    'product_service',
+    'business_model',
+    'usp',
+    'technology_used',
+    'intellectual_property',
+    'current_step'
+];
 
     protected $useTimestamps = true;
 

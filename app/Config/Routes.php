@@ -92,3 +92,58 @@ $routes->post(
     'api/admin/evaluations/decision',
     'Evaluation\EvaluationController::approveReject'
 );
+
+$routes->get('api/verify-certificate', 'Auth::verifyCertificate');
+
+// Certificate Generation
+$routes->get(
+    'admin/certificate/generate/(:segment)',
+    'CertificateController::generate/$1'
+);
+
+$routes->get(
+    'certificate/generate/(:segment)',
+    'CertificateController::generate/$1'
+);
+
+$routes->get(
+    'api/certificate/download/(:segment)',
+    'CertificateController::download/$1'
+);
+
+// Razorpay Payment Routes
+
+$routes->post(
+    'api/payment/create-order',
+    'PaymentController::createOrder'
+);
+
+$routes->post(
+    'api/payment/verify',
+    'PaymentController::verifyPayment'
+);
+
+$routes->get(
+    'api/payment/status/(:num)',
+    'PaymentController::paymentStatus/$1'
+);
+
+$routes->get(
+    'api/startup/status',
+    'Application\ApplicationController::startupStatus'
+);
+
+$routes->get(
+    'api/verified-directory',
+    'Application\ApplicationController::verifiedDirectory'
+);
+
+$routes->get(
+    'api/company/progress',
+    'Company\CompanyController::getWizardProgress'
+);
+
+$routes->put(
+    'api/company/progress',
+    'Company\CompanyController::saveWizardProgress'
+);

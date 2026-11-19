@@ -1,4 +1,5 @@
 <?php
+
 namespace App\Controllers\Evaluation;
 
 use App\Controllers\BaseController;
@@ -250,7 +251,6 @@ class EvaluationController extends BaseController
     {
         $session = session();
 
-        // Check login
         if (!$session->get('logged_in')) {
             return $this->response->setStatusCode(401)->setJSON([
                 'status' => false,
@@ -258,7 +258,6 @@ class EvaluationController extends BaseController
             ]);
         }
 
-        // Admin access only
         if ($session->get('role') !== 'Admin') {
             return $this->response->setStatusCode(403)->setJSON([
                 'status' => false,
@@ -278,6 +277,10 @@ class EvaluationController extends BaseController
                 e.comments,
                 e.status AS evaluation_status,
                 e.submitted_at,
+                e.verification_id,
+                e.certificate_issued_at,
+                e.certificate_path,
+                e.admin_remarks,
                 a.application_number,
                 a.assessment_type,
                 a.status AS application_status,
@@ -324,108 +327,127 @@ class EvaluationController extends BaseController
             'scores' => $scores
         ]);
     }
+
+
     // Admin: Approve or Reject an evaluation
-public function approveReject()
-{
-    $session = session();
+    public function approveReject()
+    {
+        $session = session();
 
-    // Check login
-    if (!$session->get('logged_in')) {
-        return $this->response->setStatusCode(401)->setJSON([
-            'status' => false,
-            'message' => 'Please login first.'
+        // Check login
+        if (!$session->get('logged_in')) {
+            return $this->response->setStatusCode(401)->setJSON([
+                'status' => false,
+                'message' => 'Please login first.'
+            ]);
+        }
+
+        // Admin access only
+        if ($session->get('role') !== 'Admin') {
+            return $this->response->setStatusCode(403)->setJSON([
+                'status' => false,
+                'message' => 'Admin access required.'
+            ]);
+        }
+
+        $input = $this->request->getJSON(true);
+
+        $applicationId = (int) ($input['application_id'] ?? 0);
+        $decision = trim($input['decision'] ?? '');
+        $remarks = trim($input['admin_remarks'] ?? '');
+
+        // Validate input
+        if (
+            $applicationId <= 0 ||
+            !in_array($decision, ['Approved', 'Rejected'], true)
+        ) {
+            return $this->response->setStatusCode(422)->setJSON([
+                'status' => false,
+                'message' => 'Valid application ID and decision are required.'
+            ]);
+        }
+
+        $db = \Config\Database::connect();
+
+        // Find submitted evaluation
+        $evaluation = $db->table('evaluations')
+            ->where('application_id', $applicationId)
+            ->get()
+            ->getRowArray();
+
+        if (!$evaluation) {
+            return $this->response->setStatusCode(404)->setJSON([
+                'status' => false,
+                'message' => 'Evaluation not found.'
+            ]);
+        }
+
+        // Prevent changing an already approved/rejected evaluation
+        if (in_array($evaluation['status'], ['Approved', 'Rejected'], true)) {
+            return $this->response->setStatusCode(409)->setJSON([
+                'status' => false,
+                'message' => 'This evaluation has already been reviewed.'
+            ]);
+        }
+
+        // Generate unique Verification ID only for approval
+        $verificationId = null;
+
+        if ($decision === 'Approved') {
+            do {
+                $verificationId = 'CRD-' . strtoupper(bin2hex(random_bytes(6)));
+
+                $existingId = $db->table('evaluations')
+                    ->where('verification_id', $verificationId)
+                    ->countAllResults();
+
+            } while ($existingId > 0);
+        }
+
+        // Start database transaction
+        $db->transBegin();
+
+        // Update evaluation decision
+        $db->table('evaluations')
+            ->where('id', $evaluation['id'])
+            ->update([
+                'status' => $decision,
+                'reviewed_by' => $session->get('user_id'),
+                'admin_remarks' => $remarks,
+                'reviewed_at' => date('Y-m-d H:i:s'),
+                'verification_id' => $verificationId
+            ]);
+
+        // Update application status
+        $db->table('assessment_applications')
+            ->where('id', $applicationId)
+            ->update([
+                'status' => $decision
+            ]);
+
+        // Check transaction
+        if ($db->transStatus() === false) {
+            $db->transRollback();
+
+            return $this->response->setStatusCode(500)->setJSON([
+                'status' => false,
+                'message' => 'Failed to update evaluation decision.'
+            ]);
+        }
+
+        $db->transCommit();
+
+        return $this->response->setJSON([
+            'status' => true,
+            'message' => 'Evaluation ' . strtolower($decision) . ' successfully.',
+            'decision' => [
+                'application_id' => $applicationId,
+                'evaluation_id' => $evaluation['id'],
+                'status' => $decision,
+                'admin_remarks' => $remarks,
+                'reviewed_by' => $session->get('user_id'),
+                'verification_id' => $verificationId
+            ]
         ]);
     }
-
-    // Admin access only
-    if ($session->get('role') !== 'Admin') {
-        return $this->response->setStatusCode(403)->setJSON([
-            'status' => false,
-            'message' => 'Admin access required.'
-        ]);
-    }
-
-    $input = $this->request->getJSON(true);
-
-    $applicationId = (int) ($input['application_id'] ?? 0);
-    $decision = trim($input['decision'] ?? '');
-    $remarks = trim($input['admin_remarks'] ?? '');
-
-    // Validate input
-    if (
-        $applicationId <= 0 ||
-        !in_array($decision, ['Approved', 'Rejected'], true)
-    ) {
-        return $this->response->setStatusCode(422)->setJSON([
-            'status' => false,
-            'message' => 'Valid application ID and decision are required.'
-        ]);
-    }
-
-    $db = \Config\Database::connect();
-
-    // Find submitted evaluation
-    $evaluation = $db->table('evaluations')
-        ->where('application_id', $applicationId)
-        ->get()
-        ->getRowArray();
-
-    if (!$evaluation) {
-        return $this->response->setStatusCode(404)->setJSON([
-            'status' => false,
-            'message' => 'Evaluation not found.'
-        ]);
-    }
-
-    // Prevent changing an already approved/rejected evaluation
-    if (in_array($evaluation['status'], ['Approved', 'Rejected'], true)) {
-        return $this->response->setStatusCode(409)->setJSON([
-            'status' => false,
-            'message' => 'This evaluation has already been reviewed.'
-        ]);
-    }
-
-    $db->transBegin();
-
-    // Update evaluation decision
-    $db->table('evaluations')
-        ->where('id', $evaluation['id'])
-        ->update([
-            'status' => $decision,
-            'reviewed_by' => $session->get('user_id'),
-            'admin_remarks' => $remarks,
-            'reviewed_at' => date('Y-m-d H:i:s')
-        ]);
-
-    // Update application status
-    $db->table('assessment_applications')
-        ->where('id', $applicationId)
-        ->update([
-            'status' => $decision
-        ]);
-
-    if ($db->transStatus() === false) {
-        $db->transRollback();
-
-        return $this->response->setStatusCode(500)->setJSON([
-            'status' => false,
-            'message' => 'Failed to update evaluation decision.'
-        ]);
-    }
-
-    $db->transCommit();
-
-    return $this->response->setJSON([
-        'status' => true,
-        'message' => 'Evaluation ' . strtolower($decision) . ' successfully.',
-        'decision' => [
-            'application_id' => $applicationId,
-            'evaluation_id' => $evaluation['id'],
-            'status' => $decision,
-            'admin_remarks' => $remarks,
-            'reviewed_by' => $session->get('user_id')
-        ]
-    ]);
 }
-}
-

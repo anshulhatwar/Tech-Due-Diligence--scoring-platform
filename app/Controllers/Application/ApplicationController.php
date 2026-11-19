@@ -447,4 +447,258 @@ class ApplicationController extends BaseController
             'applications' => $applications
         ]);
     }
+        // Get Startup Dashboard Status
+    public function startupStatus()
+    {
+        $session = session();
+
+        if (!$session->get('logged_in')) {
+            return $this->response
+                ->setStatusCode(401)
+                ->setJSON([
+                    'status' => false,
+                    'message' => 'Please login first.'
+                ]);
+        }
+
+        if ($session->get('role') !== 'Company') {
+            return $this->response
+                ->setStatusCode(403)
+                ->setJSON([
+                    'status' => false,
+                    'message' => 'Company access required.'
+                ]);
+        }
+
+        $userId = (int) $session->get('user_id');
+
+        $db = \Config\Database::connect();
+
+        $applications = $db->table('assessment_applications a')
+            ->select('
+                a.id AS application_id,
+                a.application_number,
+                a.assessment_type,
+                a.status AS application_status,
+                a.payment_status,
+                a.submitted_at,
+                aa.evaluator_id,
+                u.Name AS evaluator_name,
+                e.status AS evaluation_status,
+                e.total_score AS final_score,
+                e.verification_id,
+                e.certificate_issued_at,
+                e.certificate_path
+            ')
+            ->join(
+                'application_assignments aa',
+                'aa.application_id = a.id',
+                'left'
+            )
+            ->join(
+                'users u',
+                'u.ID = aa.evaluator_id',
+                'left'
+            )
+            ->join(
+                'evaluations e',
+                'e.application_id = a.id',
+                'left'
+            )
+            ->where('a.user_id', $userId)
+            ->orderBy('a.created_at', 'DESC')
+            ->get()
+            ->getResultArray();
+
+        foreach ($applications as &$application) {
+
+            $application['approved'] =
+                ($application['evaluation_status'] === 'Approved');
+
+            $application['certificate_download_url'] =
+                !empty($application['verification_id'])
+                ? base_url(
+                    'api/certificate/download/' .
+                    $application['verification_id']
+                )
+                : null;
+
+            $application['verification_url'] =
+                !empty($application['verification_id'])
+                ? base_url(
+                    'verify?id=' .
+                    $application['verification_id']
+                )
+                : null;
+        }
+
+        unset($application);
+
+        return $this->response->setJSON([
+            'status' => true,
+            'total_applications' => count($applications),
+            'latest_application' => $applications[0] ?? null,
+            'applications' => $applications
+        ]);
+    }
+        // Public Verified Companies Directory
+    public function verifiedDirectory()
+    {
+        $db = \Config\Database::connect();
+
+        $builder = $db->table('evaluations e')
+            ->select('
+                c.name AS company_name,
+                c.industry,
+                a.application_number,
+                a.assessment_type,
+                e.total_score AS final_score,
+                e.verification_id,
+                e.certificate_issued_at
+            ')
+            ->join(
+                'assessment_applications a',
+                'a.id = e.application_id'
+            )
+            ->join(
+                'companies c',
+                'c.id = a.company_id'
+            )
+            ->where('e.status', 'Approved')
+            ->where('e.verification_id IS NOT NULL')
+            ->where('e.verification_id !=', '');
+
+        // Search by company name or application number
+        $search = trim((string) $this->request->getGet('search'));
+
+        if ($search !== '') {
+            $builder->groupStart()
+                ->like('c.name', $search)
+                ->orLike('a.application_number', $search)
+                ->groupEnd();
+        }
+
+        // Filter by industry
+        $industry = trim((string) $this->request->getGet('industry'));
+
+        if ($industry !== '') {
+            $builder->where('c.industry', $industry);
+        }
+
+        $companies = $builder
+            ->orderBy('e.certificate_issued_at', 'DESC')
+            ->get()
+            ->getResultArray();
+
+        foreach ($companies as &$company) {
+            $company['verification_url'] = base_url(
+                'verify?id=' . $company['verification_id']
+            );
+
+            $company['certificate_download_url'] = base_url(
+                'api/certificate/download/' . $company['verification_id']
+            );
+        }
+
+        unset($company);
+
+        return $this->response->setJSON([
+            'status' => true,
+            'total' => count($companies),
+            'companies' => $companies
+        ]);
+    }
+    // GET: Fetch Wizard Progress
+public function getWizardProgress()
+{
+    $session = session();
+
+    if (!$session->get('logged_in')) {
+        return $this->response
+            ->setStatusCode(401)
+            ->setJSON([
+                'status' => false,
+                'message' => 'User is not logged in'
+            ]);
+    }
+
+    $userId = $session->get('user_id');
+
+    $companyModel = new CompanyModel();
+
+    $company = $companyModel
+        ->where('user_id', $userId)
+        ->first();
+
+    if (!$company) {
+        return $this->response
+            ->setStatusCode(404)
+            ->setJSON([
+                'status' => false,
+                'message' => 'Company profile not found',
+                'current_step' => 1
+            ]);
+    }
+
+    return $this->response->setJSON([
+        'status' => true,
+        'current_step' => (int) $company['current_step']
+    ]);
+}
+
+
+// PUT: Save Wizard Progress
+public function saveWizardProgress()
+{
+    $session = session();
+
+    if (!$session->get('logged_in')) {
+        return $this->response
+            ->setStatusCode(401)
+            ->setJSON([
+                'status' => false,
+                'message' => 'User is not logged in'
+            ]);
+    }
+
+    $userId = $session->get('user_id');
+
+    $data = $this->request->getJSON(true);
+
+    $step = (int) ($data['current_step'] ?? 0);
+
+    if ($step < 1 || $step > 8) {
+        return $this->response
+            ->setStatusCode(422)
+            ->setJSON([
+                'status' => false,
+                'message' => 'Current step must be between 1 and 8'
+            ]);
+    }
+
+    $companyModel = new CompanyModel();
+
+    $company = $companyModel
+        ->where('user_id', $userId)
+        ->first();
+
+    if (!$company) {
+        return $this->response
+            ->setStatusCode(404)
+            ->setJSON([
+                'status' => false,
+                'message' => 'Company profile not found'
+            ]);
+    }
+
+    $companyModel->update($company['id'], [
+        'current_step' => $step
+    ]);
+
+    return $this->response->setJSON([
+        'status' => true,
+        'message' => 'Wizard progress saved successfully',
+        'current_step' => $step
+    ]);
+}
 }
