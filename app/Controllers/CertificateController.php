@@ -14,7 +14,7 @@ use Endroid\QrCode\RoundBlockSizeMode;
 class CertificateController extends Controller
 {
     // ==========================================
-    // GENERATE AND DOWNLOAD CERTIFICATE
+    // GENERATE CERTIFICATE
     // ==========================================
 
     public function generate($verificationId)
@@ -29,7 +29,7 @@ class CertificateController extends Controller
 
         $db = \Config\Database::connect();
 
-        // Fetch approved evaluation
+        // Fetch approved evaluation and payment details
         $certificate = $db->table('evaluations e')
             ->select('
                 e.id,
@@ -37,8 +37,10 @@ class CertificateController extends Controller
                 e.verification_id,
                 e.certificate_issued_at,
                 e.certificate_path,
+                e.status,
                 a.application_number,
                 a.assessment_type,
+                a.payment_status,
                 c.name AS company_name,
                 c.industry
             ')
@@ -55,9 +57,21 @@ class CertificateController extends Controller
             ->get()
             ->getRowArray();
 
+        // Check certificate
         if (!$certificate) {
             return redirect()->back()
                 ->with('error', 'Approved certificate not found.');
+        }
+
+        // Check payment status
+        if (
+            strtolower(trim((string) $certificate['payment_status'])) !== 'paid'
+        ) {
+            return redirect()->back()
+                ->with(
+                    'error',
+                    'Certificate cannot be generated. Payment is not completed.'
+                );
         }
 
         // Certificate storage folder
@@ -67,6 +81,7 @@ class CertificateController extends Controller
             mkdir($folder, 0777, true);
         }
 
+        // Safe verification ID
         $safeId = preg_replace(
             '/[^A-Z0-9-]/',
             '',
@@ -74,6 +89,7 @@ class CertificateController extends Controller
         );
 
         $pdfPath = $folder . 'certificate_' . $safeId . '.pdf';
+
         $qrPath = $folder . 'qr_' . $safeId . '.png';
 
         // Public verification URL
@@ -250,6 +266,7 @@ class CertificateController extends Controller
         $options = new Options();
 
         $options->set('isRemoteEnabled', false);
+
         $options->set('defaultFont', 'DejaVu Sans');
 
         $dompdf = new Dompdf($options);
@@ -271,11 +288,12 @@ class CertificateController extends Controller
             ->where('verification_id', $verificationId)
             ->update([
                 'certificate_issued_at' => date('Y-m-d H:i:s'),
+
                 'certificate_path' =>
                     'uploads/certificates/certificate_' . $safeId . '.pdf'
             ]);
 
-        // Download certificate
+        // Download generated certificate
         return $this->response->download(
             $pdfPath,
             null
@@ -307,7 +325,8 @@ class CertificateController extends Controller
                 e.verification_id,
                 e.certificate_path,
                 e.status,
-                a.user_id
+                a.user_id,
+                a.payment_status
             ')
             ->join(
                 'assessment_applications a',
@@ -318,6 +337,7 @@ class CertificateController extends Controller
             ->get()
             ->getRowArray();
 
+        // Check certificate
         if (!$certificate) {
             return $this->response
                 ->setStatusCode(404)
@@ -329,6 +349,7 @@ class CertificateController extends Controller
 
         // Check user permission
         $role = session()->get('role');
+
         $userId = session()->get('user_id');
 
         if (
@@ -346,6 +367,18 @@ class CertificateController extends Controller
                 ]);
         }
 
+        // Check payment status
+        if (
+            strtolower(trim((string) $certificate['payment_status'])) !== 'paid'
+        ) {
+            return $this->response
+                ->setStatusCode(403)
+                ->setJSON([
+                    'status' => false,
+                    'message' => 'Payment is not completed. Certificate download is not allowed.'
+                ]);
+        }
+
         // Check PDF path
         if (empty($certificate['certificate_path'])) {
             return $this->response
@@ -356,8 +389,18 @@ class CertificateController extends Controller
                 ]);
         }
 
-        $filePath = WRITEPATH . $certificate['certificate_path'];
+        // Build actual file path
+        $relativePath = str_replace(
+            ['/', '\\'],
+            DIRECTORY_SEPARATOR,
+            trim($certificate['certificate_path'])
+        );
 
+        $filePath = rtrim(WRITEPATH, '/\\')
+            . DIRECTORY_SEPARATOR
+            . ltrim($relativePath, '/\\');
+
+        // Check PDF file
         if (!is_file($filePath)) {
             return $this->response
                 ->setStatusCode(404)

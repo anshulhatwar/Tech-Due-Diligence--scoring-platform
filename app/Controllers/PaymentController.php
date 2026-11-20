@@ -139,112 +139,180 @@ class PaymentController extends Controller
     // 2. VERIFY RAZORPAY PAYMENT
     // =====================================
 
-    public function verifyPayment()
-    {
-        if (
-            !session()->get('logged_in') ||
-            session()->get('role') !== 'Company'
-        ) {
-            return $this->response
-                ->setStatusCode(401)
-                ->setJSON([
-                    'status' => false,
-                    'message' => 'Please login first.'
-                ]);
+   public function verifyPayment()
+{
+    if (
+        !session()->get('logged_in') ||
+        session()->get('role') !== 'Company'
+    ) {
+        return $this->response
+            ->setStatusCode(401)
+            ->setJSON([
+                'status' => false,
+                'message' => 'Please login first.'
+            ]);
+    }
+
+    if (!$this->keyId || !$this->keySecret) {
+        return $this->response
+            ->setStatusCode(500)
+            ->setJSON([
+                'status' => false,
+                'message' => 'Razorpay keys are not configured.'
+            ]);
+    }
+
+    $data = $this->request->getJSON(true);
+
+    $applicationId = $data['application_id'] ?? null;
+    $orderId = $data['razorpay_order_id'] ?? null;
+    $paymentId = $data['razorpay_payment_id'] ?? null;
+    $signature = $data['razorpay_signature'] ?? null;
+
+    if (
+        !$applicationId ||
+        !$orderId ||
+        !$paymentId ||
+        !$signature
+    ) {
+        return $this->response
+            ->setStatusCode(400)
+            ->setJSON([
+                'status' => false,
+                'message' => 'Payment details are incomplete.'
+            ]);
+    }
+
+    $db = \Config\Database::connect();
+
+    $application = $db->table('assessment_applications')
+        ->where('id', $applicationId)
+        ->where('user_id', session()->get('user_id'))
+        ->where('razorpay_order_id', $orderId)
+        ->get()
+        ->getRowArray();
+
+    if (!$application) {
+        return $this->response
+            ->setStatusCode(404)
+            ->setJSON([
+                'status' => false,
+                'message' => 'Invalid application or order.'
+            ]);
+    }
+
+    if ($application['payment_status'] === 'Paid') {
+        return $this->response->setJSON([
+            'status' => true,
+            'message' => 'Payment is already verified.',
+            'payment_status' => 'Paid'
+        ]);
+    }
+
+    try {
+
+        $api = new Api(
+            $this->keyId,
+            $this->keySecret
+        );
+
+        // Step 1: Verify Razorpay signature
+        $api->utility->verifyPaymentSignature([
+            'razorpay_order_id' => $orderId,
+            'razorpay_payment_id' => $paymentId,
+            'razorpay_signature' => $signature
+        ]);
+
+        // Step 2: Fetch actual payment details from Razorpay
+        $payment = $api->payment->fetch($paymentId);
+
+        // Step 3: Verify order ID
+        if ($payment['order_id'] !== $orderId) {
+            throw new \RuntimeException('Order ID mismatch.');
         }
 
-        $data = $this->request->getJSON(true);
+        // Step 4: Verify amount
+        $expectedAmount = (int) round(
+            (float) $application['payment_amount'] * 100
+        );
 
-        $applicationId = $data['application_id'] ?? null;
-        $orderId = $data['razorpay_order_id'] ?? null;
-        $paymentId = $data['razorpay_payment_id'] ?? null;
-        $signature = $data['razorpay_signature'] ?? null;
+        if ((int) $payment['amount'] !== $expectedAmount) {
+            throw new \RuntimeException('Payment amount mismatch.');
+        }
 
+        // Step 5: Verify currency
         if (
-            !$applicationId ||
-            !$orderId ||
-            !$paymentId ||
-            !$signature
+            $payment['currency'] !==
+            $application['payment_currency']
         ) {
+            throw new \RuntimeException('Currency mismatch.');
+        }
+
+        // Step 6: Only captured payments are accepted
+        if ($payment['status'] !== 'captured') {
             return $this->response
                 ->setStatusCode(400)
                 ->setJSON([
                     'status' => false,
-                    'message' => 'Payment details are incomplete.'
+                    'message' => 'Payment is not captured yet.',
+                    'payment_status' => $payment['status']
                 ]);
         }
 
-        $db = \Config\Database::connect();
-
-        // Verify application ownership and order
-        $application = $db->table('assessment_applications')
+        // Step 7: Update database only after successful verification
+        $db->table('assessment_applications')
             ->where('id', $applicationId)
             ->where('user_id', session()->get('user_id'))
             ->where('razorpay_order_id', $orderId)
+            ->where('payment_status', 'Pending')
+            ->update([
+                'razorpay_payment_id' => $paymentId,
+                'razorpay_signature' => $signature,
+                'payment_status' => 'Paid',
+                'paid_at' => date('Y-m-d H:i:s')
+            ]);
+
+        // Confirm final database status
+        $updatedApplication = $db->table('assessment_applications')
+            ->select('payment_status')
+            ->where('id', $applicationId)
             ->get()
             ->getRowArray();
 
-        if (!$application) {
+        if (!$updatedApplication ||
+            $updatedApplication['payment_status'] !== 'Paid'
+        ) {
             return $this->response
-                ->setStatusCode(404)
+                ->setStatusCode(409)
                 ->setJSON([
                     'status' => false,
-                    'message' => 'Invalid application or order.'
+                    'message' => 'Payment status could not be updated.'
                 ]);
         }
 
-        if ($application['payment_status'] === 'Paid') {
-            return $this->response->setJSON([
-                'status' => true,
-                'message' => 'Payment is already verified.'
+        return $this->response->setJSON([
+            'status' => true,
+            'message' => 'Payment verified successfully.',
+            'payment_id' => $paymentId,
+            'application_id' => $applicationId,
+            'payment_status' => 'Paid'
+        ]);
+
+    } catch (\Throwable $e) {
+
+        log_message(
+            'error',
+            'Payment Verification Error: ' . $e->getMessage()
+        );
+
+        return $this->response
+            ->setStatusCode(400)
+            ->setJSON([
+                'status' => false,
+                'message' => 'Payment verification failed.'
             ]);
-        }
-
-        try {
-
-            $api = new Api(
-                $this->keyId,
-                $this->keySecret
-            );
-
-            // Verify payment signature
-            $api->utility->verifyPaymentSignature([
-                'razorpay_order_id' => $orderId,
-                'razorpay_payment_id' => $paymentId,
-                'razorpay_signature' => $signature
-            ]);
-
-            // Update payment details
-            $db->table('assessment_applications')
-                ->where('id', $applicationId)
-                ->where('razorpay_order_id', $orderId)
-                ->update([
-                    'razorpay_payment_id' => $paymentId,
-                    'razorpay_signature' => $signature,
-                    'payment_status' => 'Paid',
-                    'paid_at' => date('Y-m-d H:i:s')
-                ]);
-
-            return $this->response->setJSON([
-                'status' => true,
-                'message' => 'Payment verified successfully.',
-                'payment_id' => $paymentId,
-                'application_id' => $applicationId,
-                'payment_status' => 'Paid'
-            ]);
-
-        } catch (\Throwable $e) {
-
-            log_message('error', 'Payment Verification Error: ' . $e->getMessage());
-
-            return $this->response
-                ->setStatusCode(400)
-                ->setJSON([
-                    'status' => false,
-                    'message' => 'Payment verification failed.'
-                ]);
-        }
     }
+}
 
 
     // =====================================
