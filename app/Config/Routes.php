@@ -148,3 +148,9 @@ $routes->put(
     'api/company/progress',
     'Company\CompanyController::saveWizardProgress'
 );
+$routes->post('api/payment/order', function () {
+    return service('response')->setJSON([
+        'status'  => false,
+        'message' => 'Payment order route abhi pending hai (backend).',
+    ]);
+});

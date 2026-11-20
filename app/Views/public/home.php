@@ -457,34 +457,27 @@ const demoCertificates = {
   'CREDENCE-TD-2026-12345': { company: 'Demo Tech Pvt Ltd', industry: 'DeepTech / AI', score: 78, status: 'Approved', validUntil: '2027-10-29' }
 };
 
-document.getElementById('btn-verify')?.addEventListener('click', function() {
+document.getElementById('btn-verify')?.addEventListener('click', async function () {
   const id = document.getElementById('verify-input').value.trim().toUpperCase();
   const box = document.getElementById('verify-result');
-  const cert = demoCertificates[id];
   box.style.display = 'block';
-  if (cert) {
-    box.innerHTML = `
-  <div style="display:flex; gap:24px; align-items:center; flex-wrap:wrap;">
-    <div style="flex:1; min-width:220px;">
-      <div style="display:flex; align-items:center; gap:12px; margin-bottom:12px;">
-        <div style="width:56px; height:56px; border-radius:50%; background:var(--primary); color:#fff; display:flex; align-items:center; justify-content:center; font-size:1.6rem; font-weight:800;">✓</div>
-        <div>
-          <div style="font-weight:800; font-size:1.1rem; color:var(--primary);">APPROVED — Valid CREDENCE Certificate</div>
-          <div style="font-size:0.85rem; color:#64748b;">Verified by CREDENCE</div>
-        </div>
-      </div>
-      <p><strong>Company:</strong> ${cert.company}</p>
-      <p><strong>Industry:</strong> ${cert.industry}</p>
-      <p><strong>Trust Score:</strong> <span style="font-size:1.3rem; font-weight:800; color:var(--primary);">${cert.score} / 100</span></p>
-      <p><strong>Status:</strong> ${cert.status}</p>
-      <p><strong>Valid Until:</strong> ${cert.validUntil}</p>
-    </div>
-    <div style="text-align:center; padding:12px; background:#fff; border:2px solid var(--primary); border-radius:12px;">
-      <div id="verify-qr-box"></div>
-      <div style="font-family:monospace; font-size:0.8rem; font-weight:700; margin-top:6px;">${id}</div>
-      <div style="font-size:0.72rem; color:#64748b;">Scan to verify</div>
-    </div>
-  </div>`;
+  box.innerHTML = 'Checking...';
+
+  const res = await fetch('<?= base_url('api/verify-certificate') ?>?id=' + encodeURIComponent(id));
+  const data = await res.json();
+
+  if (!data.status) {
+    box.innerHTML = '<div style="color:#dc2626;font-weight:700;">' + (data.message || 'No active certificate found.') + '</div>';
+    return;
+  }
+  const c = data.certificate;
+  box.innerHTML = `
+    <div style="color:var(--primary);font-weight:800;font-size:1.1rem;margin-bottom:8px;">✓ APPROVED — Valid CREDENCE Certificate</div>
+    <p><strong>Company:</strong> ${c.company_name}</p>
+    <p><strong>Trust Score:</strong> ${c.total_score} / 100</p>
+    <p><strong>Verification ID:</strong> ${id}</p>
+    <p><strong>Issued:</strong> ${c.certificate_issued_at ?? '-'}</p>`;
+});
 
 new QRCode(document.getElementById('verify-qr-box'), {
   text: 'http://localhost:8080/verify?id=' + verId,

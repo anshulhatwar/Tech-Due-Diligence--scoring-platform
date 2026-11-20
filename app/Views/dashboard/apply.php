@@ -33,9 +33,51 @@ echo view('layouts/dashboard-header', [
       <button id="btn-trigger-payment" class="btn btn-primary">Proceed to Payment & Submit Application</button>
     </div>
 
+<script src="https://checkout.razorpay.com/v1/checkout.js"></script>
 <script>
-document.getElementById('btn-trigger-payment').addEventListener('click', function() {
-  alert('Payment gateway abhi connect nahi hua hai — backend teammate se baat karni hai Razorpay/payment API ke liye.');
+document.getElementById('btn-trigger-payment').addEventListener('click', async function () {
+  const btn = this;
+  btn.disabled = true;
+
+  try {
+    // PENDING: Anshul se order route aane par ye URL badlega
+    const orderRes = await fetch('<?= base_url('api/payment/order') ?>', {
+      method: 'POST',
+      credentials: 'same-origin',
+      headers: { 'Accept': 'application/json' }
+    });
+    const order = await orderRes.json();
+
+    if (!order.status) {
+      alert(order.message || 'Payment order abhi ready nahi hai (backend pending).');
+      return;
+    }
+
+    const rzp = new Razorpay({
+      key: order.key,
+      amount: order.amount,
+      currency: order.currency || 'INR',
+      order_id: order.order_id,
+      name: 'CREDENCE',
+      description: 'Assessment Fee',
+      handler: async function (resp) {
+        const vr = await fetch('<?= base_url('api/payment/verify') ?>', {
+          method: 'POST',
+          credentials: 'same-origin',
+          headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
+          body: JSON.stringify(resp)
+        });
+        const v = await vr.json();
+        alert(v.message || 'Payment verification done.');
+        if (v.status) window.location.href = '<?= base_url('dashboard') ?>';
+      }
+    });
+    rzp.open();
+  } catch (e) {
+    alert('Server error, dobara try karo.');
+  } finally {
+    btn.disabled = false;
+  }
 });
 </script>
 

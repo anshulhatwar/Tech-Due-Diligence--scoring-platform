@@ -27,10 +27,7 @@ class Auth extends BaseController
         $userId = session()->get('user_id');
 
         $companyModel = new \App\Models\CompanyModel();
-
-        $company = $companyModel
-            ->where('user_id', $userId)
-            ->first();
+        $company = $companyModel->where('user_id', $userId)->first();
 
         $db = \Config\Database::connect();
 
@@ -46,41 +43,23 @@ class Auth extends BaseController
         $data['documents'] = [];
 
         if ($company) {
-
             $fields = [
-                'name',
-                'founder_details',
-                'contact_email',
-                'contact_phone',
-                'website',
-                'industry',
-                'location',
-                'year_established',
-                'team_size',
-                'company_description',
-                'problem_statement',
-                'product_service',
-                'business_model',
-                'usp',
-                'technology_used',
-                'intellectual_property'
+                'name', 'founder_details', 'contact_email', 'contact_phone',
+                'website', 'industry', 'location', 'year_established',
+                'team_size', 'company_description', 'problem_statement',
+                'product_service', 'business_model', 'usp',
+                'technology_used', 'intellectual_property'
             ];
 
             $completed = 0;
-
             foreach ($fields as $field) {
                 if (!empty($company[$field])) {
                     $completed++;
                 }
             }
+            $data['profileCompletion'] = (int) round(($completed / count($fields)) * 100);
 
-            $data['profileCompletion'] = (int) round(
-                ($completed / count($fields)) * 100
-            );
-
-            // Documents
             if ($db->tableExists('documents')) {
-
                 $documents = $db->table('documents')
                     ->where('user_id', $userId)
                     ->orderBy('id', 'DESC')
@@ -91,9 +70,7 @@ class Auth extends BaseController
                 $data['documentsCount'] = count($documents);
             }
 
-            // Assessment Application
             if ($db->tableExists('assessment_applications')) {
-
                 $application = $db->table('assessment_applications')
                     ->where('user_id', $userId)
                     ->orderBy('id', 'DESC')
@@ -101,19 +78,10 @@ class Auth extends BaseController
                     ->getRowArray();
 
                 if ($application) {
-
-                    $data['applicationStatus'] =
-                        $application['status'] ?? 'Submitted';
-
-                    $data['evaluationStatus'] =
-                        $application['status'] ?? 'Pending';
-
+                    $data['applicationStatus'] = $application['status'] ?? 'Submitted';
+                    $data['evaluationStatus'] = $application['status'] ?? 'Pending';
                     $data['workflowStage'] = 4;
-
-                    $data['verificationStatus'] =
-                        ($application['status'] ?? '') === 'Certified'
-                            ? 'Verified'
-                            : 'Pending';
+                    $data['verificationStatus'] = ($application['status'] ?? '') === 'Certified' ? 'Verified' : 'Pending';
                 }
             }
         }
@@ -151,6 +119,16 @@ class Auth extends BaseController
         return view('dashboard/documents', $this->userData());
     }
 
+    public function documentsSave()
+    {
+        $this->setStepComplete('documents');
+
+        return $this->response->setJSON([
+            'status' => true,
+            'message' => 'Documents saved'
+        ]);
+    }
+
     // =========================
     // APPLY
     // =========================
@@ -169,33 +147,32 @@ class Auth extends BaseController
     }
 
     // =========================
-    // ADMIN DASHBOARD
+    // PROFILE COMPLETE (wizard step)
+    // =========================
+
+    public function profileComplete()
+    {
+        $this->setStepComplete('profile');
+
+        return $this->response->setJSON(['status' => true]);
+    }
+
+    // =========================
+    // ADMIN
     // =========================
 
     public function adminDashboard()
     {
-        if (!session()->get('logged_in')) {
-            return redirect()->to(base_url('login'));
-        }
-
-        if (session()->get('role') !== 'Admin') {
+        if (!session()->get('logged_in') || session()->get('role') !== 'Admin') {
             return redirect()->to(base_url('login'));
         }
 
         return view('admin/dashboard');
     }
 
-    // =========================
-    // ADMIN PARAMETERS
-    // =========================
-
     public function adminParams()
     {
-        if (!session()->get('logged_in')) {
-            return redirect()->to(base_url('login'));
-        }
-
-        if (session()->get('role') !== 'Admin') {
+        if (!session()->get('logged_in') || session()->get('role') !== 'Admin') {
             return redirect()->to(base_url('login'));
         }
 
@@ -203,7 +180,7 @@ class Auth extends BaseController
     }
 
     // =========================
-    // EVALUATOR DASHBOARD
+    // EVALUATOR
     // =========================
 
     public function evalDashboard()
@@ -222,14 +199,62 @@ class Auth extends BaseController
     }
 
     // =========================
-    // WIZARD STEP MANAGEMENT
+    // PUBLIC VERIFY PAGE
+    // =========================
+
+    public function verify()
+    {
+        return view('public/verify');
+    }
+
+    // =========================
+    // CERTIFICATE VERIFICATION API
+    // =========================
+
+    public function verifyCertificate()
+    {
+        $verificationId = strtoupper(trim($this->request->getGet('id') ?? ''));
+
+        if (empty($verificationId)) {
+            return $this->response->setJSON([
+                'status' => false,
+                'message' => 'Verification ID is required.'
+            ]);
+        }
+
+        $db = \Config\Database::connect();
+
+        $certificate = $db->table('evaluations e')
+            ->select('e.verification_id, e.total_score, e.certificate_issued_at, e.certificate_path,
+                      a.application_number, a.assessment_type, a.status, c.name AS company_name')
+            ->join('assessment_applications a', 'a.id = e.application_id')
+            ->join('companies c', 'c.id = a.company_id')
+            ->where('e.verification_id', $verificationId)
+            ->where('e.status', 'Approved')
+            ->get()
+            ->getRowArray();
+
+        if (!$certificate) {
+            return $this->response->setJSON([
+                'status' => false,
+                'message' => 'Invalid or unapproved certificate.'
+            ]);
+        }
+
+        return $this->response->setJSON([
+            'status' => true,
+            'message' => 'Certificate verified successfully.',
+            'certificate' => $certificate
+        ]);
+    }
+
+    // =========================
+    // WIZARD STEP HELPERS
     // =========================
 
     private function getStepStatus(): array
     {
-        $session = session();
-
-        return $session->get('wizard_steps') ?? [
+        return session()->get('wizard_steps') ?? [
             'profile' => 'active',
             'documents' => 'locked',
             'apply' => 'locked',
@@ -239,53 +264,49 @@ class Auth extends BaseController
     private function setStepComplete(string $step): void
     {
         $steps = $this->getStepStatus();
-
         $steps[$step] = 'completed';
 
         $order = ['profile', 'documents', 'apply'];
-
         $idx = array_search($step, $order);
 
         if ($idx !== false && isset($order[$idx + 1])) {
             $steps[$order[$idx + 1]] = 'active';
         }
 
-    session()->set('wizard_steps', $steps);
-}
-private function guardStep(string $step)
-{
-    $steps = $this->getStepStatus();
-    if ($steps[$step] === 'locked') {
-        // Pehle wale step pe bhejo
-        $order = ['profile', 'documents', 'apply'];
-        $idx = array_search($step, $order);
-        $prev = $order[$idx - 1] ?? 'profile';
-        return redirect()->to(base_url($prev))->with('error', 'Pehle is step ko complete karo.');
+        session()->set('wizard_steps', $steps);
     }
-    return null;
-}
-public function documentsSave()
-{
-    $this->setStepComplete('documents');
-    return $this->response->setJSON(['status' => true, 'message' => 'Documents saved']);
-}
-public function profileSave()
-{
-    $this->setStepComplete('profile');
-    return $this->response->setJSON(['status' => true, 'message' => 'Profile saved']);
-}
-private function userData(): array
-{
-    $name = session()->get('name') ?? 'User';
-    $parts = preg_split('/\s+/', trim($name));
-    $initials = strtoupper(substr($parts[0], 0, 1) . (isset($parts[1]) ? substr($parts[1], 0, 1) : ''));
-    return [
-        'userName' => $name,
-        'userInitials' => $initials ?: 'U',
-    ];
-}
-public function verify()
-{
-    return view('public/verify');
-}
+
+    private function guardStep(string $step)
+    {
+        $steps = $this->getStepStatus();
+
+        if (($steps[$step] ?? 'locked') === 'locked') {
+            $order = ['profile', 'documents', 'apply'];
+            $idx = array_search($step, $order);
+            $prev = $order[$idx - 1] ?? 'profile';
+
+            return redirect()->to(base_url($prev))->with('error', 'Pehle is step ko complete karo.');
+        }
+
+        return null;
+    }
+
+    // =========================
+    // USER DATA
+    // =========================
+
+    private function userData(): array
+    {
+        $name = session()->get('name') ?? 'User';
+        $parts = preg_split('/\s+/', trim($name));
+        $initials = strtoupper(
+            substr($parts[0] ?? '', 0, 1) .
+            (isset($parts[1]) ? substr($parts[1], 0, 1) : '')
+        );
+
+        return [
+            'userName' => $name,
+            'userInitials' => $initials ?: 'U',
+        ];
+    }
 }
