@@ -15,7 +15,6 @@
   <link rel="stylesheet" href="<?= base_url('css/style.css') ?>">
 </head>
 <body>
-
   <!-- =============================================
        AUTHENTICATION SCREEN (Registration / Login)
        ============================================= -->

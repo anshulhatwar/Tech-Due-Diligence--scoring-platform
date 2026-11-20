@@ -1,57 +1,89 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Startup Dashboard — Credence</title>
   <meta name="description" content="Credence Tech Due-Diligence & Trust Score Platform — Startup Dashboard">
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
   
 
-  <!-- Modern Font Stack -->
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Outfit:wght@500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 
-  <!-- Design System & Styles -->
-  <link rel="stylesheet" href="<?= base_url('css/style.css') ?>">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Outfit:wght@500;600;700;800&display=swap"
+          rel="stylesheet">
+
+    <link rel="stylesheet" href="<?= base_url('css/style.css') ?>">
 </head>
+
 <body>
- <video class="bg-video" autoplay muted loop playsinline>
-  <source src="<?= base_url('videos/bg.mp4') ?>" type="video/mp4">
-</video>
-<div class="bg-overlay"></div>
 
-  <div class="app-wrapper active" id="app-wrapper">
-    <!-- Header & Top Navigation Bar -->
-    <header class="navbar">
-     <button id="sidebar-toggle" class="hamburger-btn">
-  <span class="bar bar1"></span>
-  <span class="bar bar2"></span>
-  <span class="bar bar3"></span>
-</button>
-      <a href="#" class="brand-logo">
-        <img src="<?= base_url('images/logo.png') ?>" alt="Credence" style="height:34px;">
-        <div>
-          <div class="brand-title">Tech Due-Diligence & Trust Score</div>
-          <span class="brand-sub">Verification & Assessment Platform</span>
-        </div>
-      </a>
+    <!-- Background Video -->
+    <video class="bg-video" autoplay muted loop playsinline>
+        <source src="<?= base_url('videos/bg.mp4') ?>" type="video/mp4">
+    </video>
 
-      <div class="nav-controls">
-        <!-- User Info -->
-        <div class="nav-user-info">
-         <div class="nav-user-avatar"><?= esc($userInitials ?? 'U') ?></div>
-<span><?= esc($userName ?? 'User') ?></span>
-        </div>
+    <div class="bg-overlay"></div>
 
-        <button class="nav-logout-btn" id="btn-logout">Logout</button>
-      </div>
-    </header>
+    <div class="app-wrapper active" id="app-wrapper">
 
-    <div class="app-container">
-      <!-- Sidebar Navigation -->
-      <aside class="sidebar">
+        <!-- Header -->
+        <header class="navbar">
+
+            <button id="sidebar-toggle" class="hamburger-btn" type="button">
+                <span class="bar bar1"></span>
+                <span class="bar bar2"></span>
+                <span class="bar bar3"></span>
+            </button>
+
+            <a href="<?= base_url('dashboard') ?>" class="brand-logo">
+
+                <img src="<?= base_url('images/logo.png') ?>"
+                     alt="Credence"
+                     style="height:34px;">
+
+                <div>
+                    <div class="brand-title">
+                        Tech Due-Diligence & Trust Score
+                    </div>
+
+                    <span class="brand-sub">
+                        Verification & Assessment Platform
+                    </span>
+                </div>
+
+            </a>
+
+            <div class="nav-controls">
+
+                <!-- User Info -->
+                <div class="nav-user-info">
+
+                    <div class="nav-user-avatar">
+                        <?= esc($userInitials ?? 'U') ?>
+                    </div>
+
+                    <span>
+                        <?= esc($userName ?? 'User') ?>
+                    </span>
+
+                </div>
+
+                <button class="nav-logout-btn"
+                        id="btn-logout"
+                        type="button">
+                    Logout
+                </button>
+
+            </div>
+
+        </header>
+
+        <div class="app-container">
+
+            <!-- Sidebar -->
+            <aside class="sidebar">
 
         <!-- STARTUP LINKS -->
         <div class="role-nav role-startup">
@@ -72,80 +104,129 @@
             <svg width="17" height="17" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
             Assessment Application
           </a>
-          <a class="nav-link locked" data-step="5" href="javascript:void(0)">
-  <svg width="17" height="17" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path></svg>
-  <span> Evaluator Assignment</span>
-  <small class="nav-sub" id="side-st5">Locked</small>
-</a>
-<a class="nav-link locked" data-step="6" href="javascript:void(0)">
-  <svg width="17" height="17" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path></svg>
-  <span> Evaluation & Scoring</span>
-  <small class="nav-sub" id="side-st6">Locked</small>
-</a>
-<a class="nav-link locked" data-step="7" href="javascript:void(0)">
-  <svg width="17" height="17" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path></svg>
-  <span> Credence Review</span>
-  <small class="nav-sub" id="side-st7">Locked</small>
-</a>
-<a class="nav-link locked" data-step="8" href="javascript:void(0)">
-  <svg width="17" height="17" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path></svg>
-  <span> Certification & QR</span>
-  <small class="nav-sub" id="side-st8">Locked</small>
-</a>
         </div>
 
-        <div style="margin-top: auto; padding-top: 1.5rem; border-top: 1px solid var(--light-border);">
-          <button class="btn btn-secondary btn-sm" style="width:100%;" onclick="AppStore.resetDB()">
-            <svg width="14" height="14" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path></svg>
-            Reset All Data
-          </button>
-        </div>
+                <div style="margin-top:auto;padding-top:1.5rem;border-top:1px solid var(--light-border);">
 
-      </aside>
+                    <button class="btn btn-secondary btn-sm"
+                            style="width:100%;"
+                            onclick="AppStore.resetDB()"
+                            type="button">
 
-      <!-- Main Dynamic Content -->
-      <main class="main-content">
+                        <svg width="14" height="14"
+                             fill="none"
+                             stroke="currentColor"
+                             viewBox="0 0 24 24">
 
-        <section id="startup-dashboard" class="view-section active">
-          <div class="page-header">
-            <div style="display:flex; justify-content:space-between; align-items:center;">
-              <div>
-                <h1 class="page-title" id="st-comp-name">My Company</h1>
-                <p class="page-desc">Credence Assessment Portal & Application Status Tracker</p>
-              </div>
-              <span class="badge badge-new" id="st-app-status-badge">Registered</span>
-            </div>
-          </div>
-          <div class="metrics-grid">
-  <div class="metric-card">
-    <div class="metric-icon">📊</div>
-    <div>
-      <div class="metric-val">25%</div>
-      <div class="metric-label">Profile Completion</div>
-    </div>
-  </div>
-  <div class="metric-card">
-    <div class="metric-icon">📄</div>
-    <div>
-      <div class="metric-val">0/3</div>
-      <div class="metric-label">Documents Uploaded</div>
-    </div>
-  </div>
-  <div class="metric-card">
-    <div class="metric-icon">⏱️</div>
-    <div>
-      <div class="metric-val">Step 2/8</div>
-      <div class="metric-label">Workflow Stage</div>
-    </div>
-  </div>
-  <div class="metric-card">
-    <div class="metric-icon">🛡️</div>
-    <div>
-      <div class="metric-val">Pending</div>
-      <div class="metric-label">Verification Status</div>
-    </div>
-  </div>
-</div>
+                            <path stroke-linecap="round"
+                                  stroke-linejoin="round"
+                                  stroke-width="2"
+                                  d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15">
+                            </path>
+
+                        </svg>
+
+                        Reset All Data
+                    </button>
+
+                </div>
+
+            </aside>
+
+            <!-- Main Content -->
+            <main class="main-content">
+
+                <section id="startup-dashboard" class="view-section active">
+
+                    <!-- Page Header -->
+                    <div class="page-header">
+
+                        <div style="display:flex;justify-content:space-between;align-items:center;">
+
+                            <div>
+
+                                <h1 class="page-title" id="st-comp-name">
+                                    <?= esc($companyName ?? 'My Company') ?>
+                                </h1>
+
+                                <p class="page-desc">
+                                    Credence Assessment Portal & Application Status Tracker
+                                </p>
+
+                            </div>
+
+                            <span class="badge badge-new" id="st-app-status-badge">
+                                <?= esc($applicationStatus ?? 'Registered') ?>
+                            </span>
+
+                        </div>
+
+                    </div>
+
+                    <!-- Metrics -->
+                    <div class="metrics-grid">
+
+                        <div class="metric-card">
+
+                            <div class="metric-icon">📊</div>
+
+                            <div>
+                                <div class="metric-val">
+                                    <?= esc($profileCompletion ?? 0) ?>%
+                                </div>
+
+                                <div class="metric-label">
+                                    Profile Completion
+                                </div>
+                            </div>
+
+                        </div>
+
+                        <div class="metric-card">
+
+                            <div class="metric-icon">📄</div>
+
+                            <div>
+                                <div class="metric-val">
+                                    <?= esc($documentsCount ?? 0) ?>/3
+                                </div>
+
+                                <div class="metric-label">
+                                    Documents Uploaded
+                                </div>
+                            </div>
+
+                        </div>
+
+                        <div class="metric-card">
+
+                            <div class="metric-icon">⏱️</div>
+
+                            <div>
+                                <div class="metric-val">
+                                    Step <?= esc($workflowStage ?? 2) ?>/8
+                                </div>
+
+                                <div class="metric-label">
+                                    Workflow Stage
+                                </div>
+                            </div>
+
+                        </div>
+
+                        <div class="metric-card">
+
+                            <div class="metric-icon">🛡️</div>
+
+                            <div>
+                                <div class="metric-val">
+                                    <?= esc($verificationStatus ?? 'Pending') ?>
+                                </div>
+
+                                <div class="metric-label">
+                                    Verification Status
+                                </div>
+                            </div>
 
           <!-- 8-Step Wizard Progress -->
           <div class="workflow-wizard">
@@ -186,86 +267,111 @@
               </div>
             </div>
           </div>
-          
 
-          <!-- Evaluation Status Card -->
-          <div class="card" id="evaluation-status-card">
-            <div class="card-header">
-              <h3 class="card-title">Evaluation Status</h3>
-              <span class="badge badge-new" id="eval-status-badge">Not Started</span>
-            </div>
+                    <!-- Evaluation Status Card -->
+                    <div class="card" id="evaluation-status-card">
 
-            <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap:1rem; margin-top:0.5rem;">
-              <div>
-                <div style="font-size:0.8rem; color:#64748b; font-weight:600; text-transform:uppercase;">Application</div>
-                <div style="font-weight:700;" id="eval-app-status">Not Submitted</div>
-              </div>
-              <div>
-                <div style="font-size:0.8rem; color:#64748b; font-weight:600; text-transform:uppercase;">Evaluator</div>
-                <div style="font-weight:700;" id="eval-evaluator">Not Assigned</div>
-              </div>
-              <div>
-                <div style="font-size:0.8rem; color:#64748b; font-weight:600; text-transform:uppercase;">Evaluation</div>
-                <div style="font-weight:700;" id="eval-scoring">Pending</div>
-              </div>
-              <div>
-                <div style="font-size:0.8rem; color:#64748b; font-weight:600; text-transform:uppercase;">Final Score</div>
-                <div style="font-weight:700; color:var(--primary);" id="eval-final-score">-- / 100</div>
-              </div>
-            </div>
-          </div>
-          <!-- Verification Summary Card (shown once step 8 is complete) -->
-          <div class="card" id="st-cert-summary-card" style="border: 2px solid var(--primary); display: none;">
-            <div class="card-header">
-              <h3 class="card-title" style="color:var(--primary);">
-                <svg width="22" height="22" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"></path></svg>
-                Assessment Result & Verification Active
-              </h3>
-              <div>
-                <button class="btn btn-secondary btn-sm" onclick="AppStore.exportPDFReport()">Download PDF Report</button>
-                <button class="btn btn-primary btn-sm" onclick="AppStore.viewPublicCert()" style="margin-left:6px;">View Public Badge</button>
-              </div>
-            </div>
+                        <div class="card-header">
 
-            <div style="display:grid; grid-template-columns: 1fr 1fr; gap:2rem;">
-              <div>
-                <div style="font-size:0.9rem; color:#64748b; font-weight:600;">OVERALL ASSESSMENT SCORE</div>
-                <div style="font-family:'Outfit',sans-serif; font-size:3.2rem; font-weight:800; color:var(--primary);" id="st-score-val">-- / 100</div>
-                <p style="font-size:0.88rem; color:#334155; margin-bottom:12px;">
-                  <strong>Verification ID:</strong> <code id="st-ver-id-val">--</code><br>
-                  <span id="st-ver-valid-val">--</span>
-                </p>
+                            <h3 class="card-title">
+                                Evaluation Status
+                            </h3>
 
-                <div style="margin-top:1.5rem;">
-                  <h4 style="font-size:0.95rem; font-weight:700; margin-bottom:8px;">Parameter Breakdown</h4>
-                  <div id="st-score-breakdown-bars"></div>
-                </div>
-              </div>
+                            <span class="badge badge-new" id="eval-status-badge">
+                                <?= esc($evaluationStatus ?? 'Not Started') ?>
+                            </span>
 
-              <div>
-                <h4 style="font-size:0.95rem; font-weight:700; margin-bottom:8px; text-align:center;">Radar Assessment Matrix</h4>
-                <div style="position:relative; width:100%; height:320px;">
-                  <canvas id="st-score-radar-canvas"></canvas>
-                </div>
-              </div>
-            </div>
-          </div>
-          <!-- Verified Directory Card -->
-<div class="card" id="directory-card">
-  <div class="card-header">
-    <h3 class="card-title">Verified Directory</h3>
-    <span class="badge badge-active">Public</span>
-  </div>
+                        </div>
 
-  <div style="display:flex; gap:10px; flex-wrap:wrap; margin-bottom:1rem;">
-    <input type="text" id="dir-search" class="form-control" placeholder="Search by company name..." style="flex:1; min-width:200px;">
-    <select id="dir-industry" class="form-select" style="width:220px;">
-      <option value="">All Industries</option>
-      <option value="DeepTech / AI">DeepTech / AI</option>
-      <option value="FinTech">FinTech</option>
-      <option value="HealthTech / MedTech">HealthTech / MedTech</option>
-    </select>
-  </div>
+                        <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:1rem;margin-top:0.5rem;">
+
+                            <div>
+
+                                <div style="font-size:0.8rem;color:#64748b;font-weight:600;text-transform:uppercase;">
+                                    Application
+                                </div>
+
+                                <div style="font-weight:700;" id="eval-app-status">
+                                    <?= esc($applicationStatus ?? 'Not Submitted') ?>
+                                </div>
+
+                            </div>
+
+                            <div>
+
+                                <div style="font-size:0.8rem;color:#64748b;font-weight:600;text-transform:uppercase;">
+                                    Evaluator
+                                </div>
+
+                                <div style="font-weight:700;" id="eval-evaluator">
+                                    <?= esc($evaluatorName ?? 'Not Assigned') ?>
+                                </div>
+
+                            </div>
+
+                            <div>
+
+                                <div style="font-size:0.8rem;color:#64748b;font-weight:600;text-transform:uppercase;">
+                                    Evaluation
+                                </div>
+
+                                <div style="font-weight:700;" id="eval-scoring">
+                                    <?= esc($evaluationStatus ?? 'Pending') ?>
+                                </div>
+
+                            </div>
+
+                            <div>
+
+                                <div style="font-size:0.8rem;color:#64748b;font-weight:600;text-transform:uppercase;">
+                                    Final Score
+                                </div>
+
+                                <div style="font-weight:700;color:var(--primary);" id="eval-final-score">
+                                    <?= esc($finalScore ?? '-- / 100') ?>
+                                </div>
+
+                            </div>
+
+                        </div>
+
+                    </div>
+
+                    <!-- Verified Directory Card -->
+                    <div class="card" id="directory-card">
+
+                        <div class="card-header">
+
+                            <h3 class="card-title">
+                                Verified Directory
+                            </h3>
+
+                            <span class="badge badge-active">
+                                Public
+                            </span>
+
+                        </div>
+
+                        <div style="display:flex;gap:10px;flex-wrap:wrap;margin-bottom:1rem;">
+
+                            <input type="text"
+                                   id="dir-search"
+                                   class="form-control"
+                                   placeholder="Search by company name..."
+                                   style="flex:1;min-width:200px;">
+
+                            <select id="dir-industry"
+                                    class="form-select"
+                                    style="width:220px;">
+
+                                <option value="">All Industries</option>
+                                <option value="DeepTech / AI">DeepTech / AI</option>
+                                <option value="FinTech">FinTech</option>
+                                <option value="HealthTech / MedTech">HealthTech / MedTech</option>
+
+                            </select>
+
+                        </div>
 
   <div class="table-responsive">
     <table class="custom-table">
@@ -290,7 +396,6 @@
 <div class="card" id="certificate-card" style="display:none; border:2px solid var(--primary);">
   <div class="card-header">
     <h3 class="card-title" style="color:var(--primary);">Certificate Issued</h3>
-    <div style="display:inline-block; padding:6px 14px; border:2px solid var(--primary); color:var(--primary); border-radius:999px; font-weight:800; letter-spacing:0.05em; text-transform:uppercase; font-size:0.8rem; margin-bottom:10px;">✓ Approved by CREDENCE</div>
     <span class="badge badge-active">Active</span>
   </div>
 
@@ -298,101 +403,224 @@
     <div>
       <div style="font-size:0.8rem; color:#64748b; font-weight:600; text-transform:uppercase;">Verification ID</div>
       <div style="font-family:monospace; font-size:1.4rem; font-weight:700; color:var(--primary);" id="cert-ver-id">--</div>
-      <div style="font-size:0.8rem; color:#64748b; font-weight:600; text-transform:uppercase; margin-top:10px;">Trust Score</div>
-<div style="font-family:'Outfit',sans-serif; font-size:1.8rem; font-weight:800; color:var(--primary);" id="cert-score">-- / 100</div>
       <p style="font-size:0.9rem; color:#334155; margin-top:10px;">
         Your Credence Trust Score certificate has been approved. This verification ID and QR code will be used for public verification.
       </p>
     </div>
     <div id="cert-qr" style="padding:12px; background:#fff; border:2px solid var(--primary); border-radius:8px; text-align:center;">
-  <div id="cert-qr-canvas"></div>
-  <div style="font-weight:700; font-family:monospace; font-size:0.85rem; margin-top:6px;" id="cert-qr-text">--</div>
-</div>
-  </div>
-</div>
-
-          <!-- Submitted Documents Overview -->
-          <div class="card">
-            <div class="card-header">
-              <h3 class="card-title">Verification Documents Status</h3>
-              <a href="<?= base_url('documents') ?>" class="btn btn-secondary btn-sm">+ Upload Document</a>
-            </div>
-            <div class="table-responsive">
-              <table class="custom-table">
-                <thead>
-                  <tr>
-                    <th>Document Name</th>
-                    <th>Submitted Date</th>
-                    <th>Status</th>
-                    <th>Action</th>
-                  </tr>
-                </thead>
-                <tbody id="st-docs-table-body">
-                  <!-- Dynamic insertion -->
-                </tbody>
-              </table>
-            </div>
-            <div class="empty-state" id="st-docs-empty" style="display:none;">
-              <div class="empty-state-icon">📄</div>
-              <h3>No Documents Uploaded Yet</h3>
-              <p>Go to Document Manager to upload required verification documents.</p>
-            </div>
-          </div>
-        </section>
-
-      </main>
+      <div style="font-size:0.8rem; color:#64748b;">QR Code</div>
+      <div style="font-weight:700; font-family:monospace;" id="cert-qr-text">--</div>
     </div>
   </div>
+</div>
 
-  <!-- Vendor JS Libraries -->
-<script>
-// ===== Count-up animation for metric cards =====
-function animateCount(el, target, duration = 1200) {
-  let startTime = null;
-  function update(currentTime) {
-    if (!startTime) startTime = currentTime;
-    const progress = Math.min((currentTime - startTime) / duration, 1);
-    el.textContent = Math.floor(progress * target);
-    if (progress < 1) requestAnimationFrame(update);
-    else el.textContent = target;
-  }
-  requestAnimationFrame(update);
-}
+                    <!-- Submitted Documents Overview -->
+                    <div class="card">
 
-document.querySelectorAll('.metric-val').forEach(el => {
-  const target = parseInt(el.textContent.replace(/[^0-9]/g, '')) || 0;
-  animateCount(el, target);
-});
+                        <div class="card-header">
 
-// ===== Sidebar toggle =====
-document.getElementById('sidebar-toggle')?.addEventListener('click', function() {
-  document.querySelector('.sidebar').classList.toggle('collapsed');
-  this.classList.toggle('active');
-  this.style.transform = 'scale(0.85)';
-  setTimeout(() => { this.style.transform = 'scale(1)'; }, 150);
-});
+                            <h3 class="card-title">
+                                Verification Documents Status
+                            </h3>
+
+                            <a href="<?= base_url('documents') ?>"
+                               class="btn btn-secondary btn-sm">
+                                + Upload Document
+                            </a>
+
+                        </div>
+
+                        <div class="table-responsive">
+
+                            <table class="custom-table">
+
+                                <thead>
+                                    <tr>
+                                        <th>Document Name</th>
+                                        <th>Submitted Date</th>
+                                        <th>Status</th>
+                                        <th>Action</th>
+                                    </tr>
+                                </thead>
+
+                                <tbody id="st-docs-table-body">
+
+                                    <?php if (!empty($documents)): ?>
+
+                                        <?php foreach ($documents as $document): ?>
+
+                                            <tr>
+
+                                                <td>
+                                                    <?= esc($document['document_name'] ?? 'Document') ?>
+                                                </td>
+
+                                                <td>
+
+                                                    <?php
+                                                    $submittedDate =
+                                                        $document['uploaded_at']
+                                                        ?? $document['created_at']
+                                                        ?? null;
+                                                    ?>
+
+                                                    <?= $submittedDate
+                                                        ? esc(date('d M Y', strtotime($submittedDate)))
+                                                        : '—' ?>
+
+                                                </td>
+
+                                                <td>
+
+                                                    <span class="badge badge-new">
+                                                        <?= esc($document['status'] ?? 'Pending') ?>
+                                                    </span>
+
+                                                </td>
+
+                                                <td>
+
+                                                    <?php if (!empty($document['file_path'])): ?>
+
+                                                        <a href="<?= base_url($document['file_path']) ?>"
+                                                           class="btn btn-secondary btn-sm"
+                                                           target="_blank"
+                                                           rel="noopener noreferrer">
+                                                            View
+                                                        </a>
+
+                                                    <?php else: ?>
+
+                                                        <span>—</span>
+
+                                                    <?php endif; ?>
+
+                                                </td>
+
+                                            </tr>
+
+                                        <?php endforeach; ?>
+
+                                    <?php else: ?>
+
+                                        <tr>
+                                            <td colspan="4" style="text-align:center;">
+                                                No documents uploaded yet.
+                                            </td>
+                                        </tr>
+
+                                    <?php endif; ?>
+
+                                </tbody>
+
+                            </table>
+
+                        </div>
+
+                        <?php if (empty($documents)): ?>
+
+                            <div class="empty-state" id="st-docs-empty">
+
+                                <div class="empty-state-icon">📄</div>
+
+                                <h3>No Documents Uploaded Yet</h3>
+
+                                <p>
+                                    Go to Document Manager to upload required verification documents.
+                                </p>
+
+                            </div>
+
+                        <?php endif; ?>
+
+                    </div>
+
+                </section>
+
+            </main>
+
+        </div>
+
+    </div>
+
+    <!-- Dashboard JavaScript -->
+    <script>
+
+        // Animate only numeric metric values.
+        function animateCount(el, target, duration = 1200) {
+
+            let startTime = null;
+
+            function update(currentTime) {
+
+                if (!startTime) {
+                    startTime = currentTime;
+                }
+
+                const progress = Math.min(
+                    (currentTime - startTime) / duration,
+                    1
+                );
+
+                el.textContent = Math.floor(progress * target);
+
+                if (progress < 1) {
+                    requestAnimationFrame(update);
+                } else {
+                    el.textContent = target;
+                }
+
+            }
+
+            requestAnimationFrame(update);
+
+        }
+
+
+        // Animate percentage metrics only.
+        document.querySelectorAll('.metric-val').forEach(function (el) {
+
+            const originalText = el.textContent.trim();
+
+            if (/^\d+%$/.test(originalText)) {
+
+                const target = parseInt(originalText, 10);
+
+                animateCount(el, target);
+
+                el.textContent = '0%';
+
+            }
+
+        });
+
+
+        // Sidebar Toggle
+        document.getElementById('sidebar-toggle')
+            ?.addEventListener('click', function () {
+
+                document.querySelector('.sidebar')
+                    ?.classList.toggle('collapsed');
+
+                this.classList.toggle('active');
+
+                this.style.transform = 'scale(0.85)';
+
+                setTimeout(() => {
+                    this.style.transform = 'scale(1)';
+                }, 150);
+
+            });
 
 // ===== Logout =====
 document.getElementById('btn-logout')?.addEventListener('click', async function() {
   await fetch('<?= base_url('api/logout') ?>', { method: 'POST' });
   window.location.href = '<?= base_url('login') ?>';
 });
-function showCertificate(verId, score) {
+// ===== Certificate card (demo) =====
+function showCertificate(verId) {
   document.getElementById('cert-ver-id').textContent = verId;
-  document.getElementById('cert-score').textContent = score + ' / 100';
- document.getElementById('cert-score').textContent = (score ?? '--') + ' / 100';
   document.getElementById('cert-qr-text').textContent = verId;
-
-  const box = document.getElementById('cert-qr-canvas');
-  box.innerHTML = '';
-  new QRCode(box, {
-   text: 'http://localhost:8080/verify?id=' + verId, // production me real domain
-    width: 120,
-    height: 120,
-    colorDark: '#0F6E5C',
-    colorLight: '#ffffff'
-  });
-
   document.getElementById('certificate-card').style.display = 'block';
 }
 // ===== Verified Directory (demo data) =====
@@ -422,20 +650,7 @@ function renderDirectory() {
 document.getElementById('dir-search').addEventListener('input', renderDirectory);
 document.getElementById('dir-industry').addEventListener('change', renderDirectory);
 renderDirectory();
-// Backend status aane par sidebar ka sub-text aur class update karo
-function setSidebarStatus(s) {
-  const update = (step, text, cls) => {
-    const link = document.querySelector(`.sidebar .nav-link[data-step="${step}"]`);
-    link.className = 'nav-link ' + cls;
-    document.getElementById('side-st' + step).textContent = text;
-  };
-  update(, s.evaluator ? 'Assigned: ' + s.evaluator : 'Locked', s.evaluator ? 'done' : 'locked');
-  update(, s.evaluationStatus === 'Completed' ? 'Score: ' + s.finalScore : (s.evaluationStatus || 'Locked'), s.evaluationStatus === 'Completed' ? 'done' : (s.evaluator ? 'active-step' : 'locked'));
-  update(, s.reviewStatus || 'Locked', s.reviewStatus === 'Approved' || s.reviewStatus === 'Rejected' ? 'done' : (s.evaluationStatus === 'Completed' ? 'active-step' : 'locked'));
-  update(, s.certificate === 'Available' ? 'Available' : 'Locked', s.certificate === 'Available' ? 'done' : 'locked');
-}
-
-// Test (console me): setSidebarStatus({ evaluator: 'Rahul Mehta', evaluationStatus: 'In Progress' })
 </script>
 </body>
+
 </html>

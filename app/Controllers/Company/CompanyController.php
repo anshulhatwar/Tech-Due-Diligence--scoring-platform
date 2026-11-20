@@ -272,4 +272,87 @@ class CompanyController extends BaseController
             'company_id' => $company['id']
         ]);
     }
+    // GET: Fetch Wizard Progress
+public function getWizardProgress()
+{
+    $session = session();
+
+    if (!$session->get('logged_in')) {
+        return $this->response->setStatusCode(401)->setJSON([
+            'status' => false,
+            'message' => 'User is not logged in'
+        ]);
+    }
+
+    $userId = $session->get('user_id');
+
+    $companyModel = new CompanyModel();
+
+    $company = $companyModel
+        ->where('user_id', $userId)
+        ->first();
+
+    if (!$company) {
+        return $this->response->setStatusCode(404)->setJSON([
+            'status' => false,
+            'message' => 'Company profile not found',
+            'current_step' => 1
+        ]);
+    }
+
+    return $this->response->setJSON([
+        'status' => true,
+        'current_step' => (int) $company['current_step']
+    ]);
+}
+
+
+// PUT: Save Wizard Progress
+public function saveWizardProgress()
+{
+    $session = session();
+
+    if (!$session->get('logged_in')) {
+        return $this->response->setStatusCode(401)->setJSON([
+            'status' => false,
+            'message' => 'User is not logged in'
+        ]);
+    }
+
+    $userId = $session->get('user_id');
+
+    $data = $this->request->getJSON(true);
+
+    $step = (int) ($data['current_step'] ?? 0);
+
+    if ($step < 1 || $step > 8) {
+        return $this->response->setStatusCode(422)->setJSON([
+            'status' => false,
+            'message' => 'Step must be between 1 and 8'
+        ]);
+    }
+
+    $companyModel = new CompanyModel();
+
+    $company = $companyModel
+        ->where('user_id', $userId)
+        ->first();
+
+    if (!$company) {
+        return $this->response->setStatusCode(404)->setJSON([
+            'status' => false,
+            'message' => 'Company profile not found'
+        ]);
+    }
+
+    $companyModel->update($company['id'], [
+        'current_step' => $step
+    ]);
+
+    return $this->response->setJSON([
+        'status' => true,
+        'message' => 'Wizard progress saved successfully',
+        'current_step' => $step
+    ]);
+}
 }

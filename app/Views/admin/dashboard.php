@@ -6,87 +6,128 @@
   <title>CREDENCE Admin Dashboard</title>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Outfit:wght@500;600;700;800&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="<?= base_url('css/style.css') ?>">
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
 </head>
+
 <body>
 
 <header class="navbar">
-  <button id="sidebar-toggle" class="hamburger-btn">
-    <span class="bar bar1"></span>
-    <span class="bar bar2"></span>
-    <span class="bar bar3"></span>
-  </button>
-  <a href="#" class="brand-logo">
-    <img src="<?= base_url('images/logo.png') ?>" alt="Credence" style="height:34px;">
-    <div>
-      <div class="brand-title">Tech Due-Diligence & Trust Score</div>
-      <span class="brand-sub">Verification & Assessment Platform</span>
+
+    <button id="sidebar-toggle" class="hamburger-btn">
+        <span class="bar bar1"></span>
+        <span class="bar bar2"></span>
+        <span class="bar bar3"></span>
+    </button>
+
+    <a href="#" class="brand-logo">
+        <img src="<?= base_url('images/logo.png') ?>" alt="Credence" style="height:34px;">
+
+        <div>
+            <div class="brand-title">Tech Due-Diligence & Trust Score</div>
+            <span class="brand-sub">Verification & Assessment Platform</span>
+        </div>
+    </a>
+
+    <div class="nav-controls">
+        <div class="nav-user-info">
+            <div class="nav-user-avatar">AD</div>
+            <span>Admin</span>
+        </div>
+
+        <button class="nav-logout-btn" id="btn-logout">Logout</button>
     </div>
-  </a>
-  <div class="nav-controls">
-    <div class="nav-user-info">
-      <div class="nav-user-avatar">AD</div>
-      <span>Admin</span>
-    </div>
-    <button class="nav-logout-btn" id="btn-logout">Logout</button>
-  </div>
+
 </header>
 
+
 <div class="app-container">
-  <aside class="sidebar">
-    <div class="role-nav">
-      <div class="sidebar-title">CREDENCE Admin</div>
-      <a class="nav-link active" href="<?= base_url('admin') ?>">
-        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10"></path></svg>
-        Applications Overview
-      </a>
-      <a class="nav-link" href="<?= base_url('admin/params') ?>">
-        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10"></path></svg>
-        Assessment Parameters
-      </a>
-      <a class="nav-link" href="<?= base_url('eval') ?>">
-  <svg width="17" height="17" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"></path></svg>
-  Assigned Queue
-</a>
-    </div>
-  </aside>
 
-  <main class="main-content">
-    <div class="page-header">
-      <h1 class="page-title">CREDENCE Admin Dashboard</h1>
-      <p class="page-desc">Manage startup assessment applications, evaluator assignments, and certificates</p>
-    </div>
+    <!-- Sidebar -->
 
-    <div class="metrics-grid">
-      <div class="metric-card">
-        <div class="metric-icon">📋</div>
-        <div>
-          <div class="metric-val">0</div>
-          <div class="metric-label">Total Applications</div>
+    <aside class="sidebar">
+
+        <div class="role-nav">
+
+            <div class="sidebar-title">CREDENCE Admin</div>
+
+            <a class="nav-link active" href="<?= base_url('admin') ?>">
+                Applications Overview
+            </a>
+
+            <a class="nav-link" href="<?= base_url('admin/params') ?>">
+                Assessment Parameters
+            </a>
+
+            <a class="nav-link" href="<?= base_url('eval') ?>">
+                Assigned Queue
+            </a>
+
         </div>
-      </div>
-      <div class="metric-card">
-        <div class="metric-icon">⏳</div>
-        <div>
-          <div class="metric-val">0</div>
-          <div class="metric-label">Under Review</div>
+
+    </aside>
+
+
+    <!-- Main Content -->
+
+    <main class="main-content">
+
+        <div class="page-header">
+
+            <h1 class="page-title">CREDENCE Admin Dashboard</h1>
+
+            <p class="page-desc">
+                Manage startup assessment applications, evaluator assignments, and certificates
+            </p>
+
         </div>
-      </div>
-      <div class="metric-card">
-        <div class="metric-icon">🛡️</div>
-        <div>
-          <div class="metric-val">0</div>
-          <div class="metric-label">Active Verifications</div>
+
+
+        <div id="dashboard-message" role="status" style="margin-bottom:15px;"></div>
+
+
+        <!-- Dashboard Metrics -->
+
+        <div class="metrics-grid">
+
+            <div class="metric-card">
+                <div class="metric-icon">📋</div>
+
+                <div>
+                    <div class="metric-val" id="total-applications">0</div>
+                    <div class="metric-label">Total Applications</div>
+                </div>
+            </div>
+
+
+            <div class="metric-card">
+                <div class="metric-icon">⏳</div>
+
+                <div>
+                    <div class="metric-val" id="under-review">0</div>
+                    <div class="metric-label">Under Review</div>
+                </div>
+            </div>
+
+
+            <div class="metric-card">
+                <div class="metric-icon">🛡️</div>
+
+                <div>
+                    <div class="metric-val" id="active-verifications">0</div>
+                    <div class="metric-label">Active Verifications</div>
+                </div>
+            </div>
+
+
+            <div class="metric-card">
+                <div class="metric-icon">💰</div>
+
+                <div>
+                    <div class="metric-val" id="assessment-revenue">₹0</div>
+                    <div class="metric-label">Assessment Revenue</div>
+                </div>
+            </div>
+
         </div>
-      </div>
-      <div class="metric-card">
-        <div class="metric-icon">💰</div>
-        <div>
-          <div class="metric-val">0</div>
-          <div class="metric-label">Assessment Revenue</div>
-        </div>
-      </div>
-    </div>
 
     <div class="card">
       <div class="card-header">
@@ -132,11 +173,88 @@
       <select id="assign-evaluator-select" class="form-select">
         <option value="">-- Select Evaluator --</option>
         <option value="Anshul ">Anshul  (DeepTech / AI)</option>
+        <option value="Madhur">Madhur (FinTech)</option>
+        <option value="Aryan">Aryan (HealthTech)</option>
       </select>
     </div>
     <div style="display:flex; justify-content:flex-end; gap:10px; margin-top:1rem;">
       <button class="btn btn-secondary" onclick="closeAssign()">Cancel</button>
       <button class="btn btn-primary" onclick="confirmAssign()">Assign & Notify Evaluator</button>
+    </div>
+  </div>
+</div>
+
+
+<!-- Evaluation Review Modal -->
+
+<div class="modal-backdrop" id="review-modal">
+
+    <div class="modal-box" style="max-width:750px;max-height:90vh;overflow-y:auto;">
+
+        <div class="modal-header">
+
+            <h3 class="card-title">
+                Evaluation Review:
+                <span id="review-company"></span>
+            </h3>
+
+            <button class="modal-close" onclick="closeReview()">
+                &times;
+            </button>
+
+        </div>
+
+    <div style="background:#f8fafc; padding:12px; border-radius:var(--radius-md); margin-bottom:1rem; border:1px solid #e2e8f0;">
+      <strong>Evaluator Score:</strong> <span id="review-score" style="color:var(--primary); font-weight:700;">78 / 100</span><br>
+      <strong>Evaluator:</strong> <span id="review-evaluator">Anshul</span>
+    </div>
+
+
+        <div id="review-content" style="display:none;">
+
+            <div style="background:#f8fafc;padding:15px;border-radius:10px;margin-bottom:20px;border:1px solid #e2e8f0;">
+
+                <p>
+                    <strong>Application Number:</strong>
+                    <span id="review-app-number">--</span>
+                </p>
+
+                <p>
+                    <strong>Evaluator:</strong>
+                    <span id="review-evaluator">--</span>
+                </p>
+
+                <p>
+                    <strong>Evaluation Status:</strong>
+                    <span id="review-status">--</span>
+                </p>
+
+                <p>
+                    <strong>Total Score:</strong>
+
+                    <span id="review-score" style="color:var(--primary);font-weight:700;">
+                        --
+                    </span>
+                    / 100
+
+                </p>
+
+                <br>
+
+                <strong>Evaluator Remarks:</strong>
+
+                <p id="review-comments" style="margin-top:8px;">
+                    --
+                </p>
+
+            </div>
+
+    <div id="review-qr" style="text-align:center; margin:1rem 0;"></div>
+
+    <div style="display:flex; justify-content:flex-end; gap:10px;">
+      <button class="btn btn-secondary" onclick="closeReview()">Cancel</button>
+      <button class="btn btn-danger" onclick="rejectReview()">Reject</button>
+      <button class="btn btn-success" onclick="approveReview()">Approve & Issue Certificate</button>
     </div>
   </div>
 </div>
@@ -149,8 +267,8 @@
     </div>
 
     <div style="background:#f8fafc; padding:12px; border-radius:var(--radius-md); margin-bottom:1rem; border:1px solid #e2e8f0;">
-      <strong>Evaluator Score:</strong> <span id="review-score" style="color:var(--primary); font-weight:700;">76 / 100</span><br>
-      <strong>Evaluator:</strong> <span id="review-evaluator">Anshul</span>
+      <strong>Evaluator Score:</strong> <span id="review-score" style="color:var(--primary); font-weight:700;">78 / 100</span><br>
+      <strong>Evaluator:</strong> <span id="review-evaluator">Rahul Mehta</span>
     </div>
 
     <div class="form-group">
@@ -170,11 +288,8 @@
   </main>
 </div>
 
-<script>
-const MIN_APPROVAL_SCORE = 75;
-const approvedIds = new Set();
-const approvedData = {};
 
+<script>
 document.getElementById('sidebar-toggle')?.addEventListener('click', function() {
   document.querySelector('.sidebar').classList.toggle('collapsed');
   this.classList.toggle('active');
@@ -184,9 +299,10 @@ document.getElementById('btn-logout')?.addEventListener('click', async function(
   await fetch('<?= base_url('api/logout') ?>', { method: 'POST' });
   window.location.href = '<?= base_url('login') ?>';
 });
+let currentAssignCompany = null;
 
-// ===== Assign Evaluator =====
 function openAssignModal(company) {
+  currentAssignCompany = company;
   document.getElementById('assign-company').textContent = company;
   document.getElementById('assign-modal').classList.add('active');
 }
@@ -205,8 +321,141 @@ function confirmAssign() {
   alert(evaluator + ' ko assign ho gaya (demo). Backend API baaki hai.');
   closeAssign();
 }
+function generateVerId() {
+  const year = new Date().getFullYear();
+  const rand = String(Math.floor(Math.random() * 100000)).padStart(5, '0');
+  return `CREDENCE-TD-${year}-${rand}`;
+}
 
-// ===== Review & Certificate =====
+function openReview(company) {
+  document.getElementById('review-company').textContent = company;
+  document.getElementById('review-verid').value = '(Approve karne par generate hoga)';
+  document.getElementById('review-qr').innerHTML = '';
+  document.getElementById('review-modal').classList.add('active');
+}
+
+function closeReview() {
+
+    document.getElementById('review-modal').classList.remove('active');
+
+    currentReviewApplicationId = null;
+
+    decisionInProgress = false;
+
+}
+
+
+// ===============================
+// APPROVE / REJECT API
+// ===============================
+
+async function submitDecision(decision) {
+
+    if (!currentReviewApplicationId || decisionInProgress) {
+        return;
+    }
+
+    const remarks = document.getElementById('admin-remarks').value.trim();
+
+
+    const confirmed = confirm(
+        'Are you sure you want to ' + decision + ' this application?'
+    );
+
+    if (!confirmed) {
+        return;
+    }
+
+
+    decisionInProgress = true;
+
+    const approveButton = document.getElementById('approve-button');
+
+    const rejectButton = document.getElementById('reject-button');
+
+    approveButton.disabled = true;
+
+    rejectButton.disabled = true;
+
+
+    try {
+
+        const response = await fetch(decisionUrl, {
+
+            method: 'POST',
+
+            credentials: 'same-origin',
+
+            headers: {
+
+                'Content-Type': 'application/json',
+
+                'Accept': 'application/json'
+
+            },
+
+            body: JSON.stringify({
+
+                application_id: currentReviewApplicationId,
+
+                decision: decision,
+
+                admin_remarks: remarks
+
+            })
+
+        });
+
+
+        const data = await response.json();
+
+
+        if (!response.ok || !data.status) {
+
+            throw new Error(data.message || 'Unable to update decision.');
+
+        }
+
+
+        alert(data.message || 'Decision updated successfully.');
+
+
+        closeReview();
+
+        loadApplications();
+
+
+    } catch (error) {
+
+        alert(error.message);
+
+        approveButton.disabled = false;
+
+        rejectButton.disabled = false;
+
+    } finally {
+
+        decisionInProgress = false;
+
+    }
+
+}
+
+
+// ===============================
+// APPROVE
+// ===============================
+
+function approveReview() {
+  const verId = generateVerId();
+  document.getElementById('review-verid').value = verId;
+  document.getElementById('review-qr').innerHTML =
+    '<div style="display:inline-block; padding:12px; background:#fff; border:2px solid var(--primary); border-radius:8px;">' +
+    '<div style="font-size:0.8rem; color:#64748b;">QR Code (demo)</div>' +
+    '<div style="font-family:monospace; font-weight:700; margin-top:6px;">' + verId + '</div>' +
+    '</div>';
+  alert('Certificate issue ho gaya (demo). Backend se Verification ID aur QR generate karna baaki hai.');
+}
 function generateVerId() {
   const year = new Date().getFullYear();
   const rand = String(Math.floor(Math.random() * 100000)).padStart(5, '0');
@@ -230,30 +479,14 @@ function rejectReview() {
 }
 
 function approveReview() {
-  const score = parseInt(document.getElementById('review-score').textContent) || 0;
-  if (score < MIN_APPROVAL_SCORE) {
-    alert('Score ' + score + ' hai, minimum ' + MIN_APPROVAL_SCORE + ' chahiye. Approve nahi ho sakta.');
-    return;
-  }
-
   const verId = generateVerId();
-  approvedIds.add(verId);
-  approvedData[verId] = {
-    company: document.getElementById('review-company').textContent,
-    score: score,
-    issued: new Date().toISOString().slice(0, 10)
-  };
   document.getElementById('review-verid').value = verId;
-
-  const box = document.getElementById('review-qr');
-  box.innerHTML = '';
-  new QRCode(box, {
-    text: 'http://localhost:8080/verify?id=' + verId,
-    width: 120, height: 120,
-    colorDark: '#0F6E5C', colorLight: '#ffffff'
-  });
-
-  alert('Certificate approve ho gaya. Score: ' + score);
+  document.getElementById('review-qr').innerHTML =
+    '<div style="display:inline-block; padding:12px; background:#fff; border:2px solid var(--primary); border-radius:8px;">' +
+    '<div style="font-size:0.8rem; color:#64748b;">QR Code (demo)</div>' +
+    '<div style="font-family:monospace; font-weight:700; margin-top:6px;">' + verId + '</div>' +
+    '</div>';
+  alert('Certificate issue ho gaya (demo). Backend se Verification ID aur QR generate karna baaki hai.');
 }
 </script>
 

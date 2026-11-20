@@ -42,4 +42,109 @@ $routes->post('/profile/complete', 'Auth::profileComplete');
 $routes->post('api/company', 'Company\CompanyController::create');
 $routes->get('api/company', 'Company\CompanyController::show');
 $routes->put('api/company', 'Company\CompanyController::update');
-// =====================================
+
+// DOCUMENT APIs
+$routes->post('api/documents', 'Document\DocumentController::upload');
+$routes->get('api/documents', 'Document\DocumentController::index');
+$routes->get('api/documents/(:num)', 'Document\DocumentController::show/$1');
+$routes->delete('api/documents/(:num)', 'Document\DocumentController::deleteDocument/$1');
+$routes->put('api/documents/(:num)/status', 'Document\DocumentController::updateStatus/$1');
+
+// =========================
+// ASSESSMENT APPLICATION APIs
+// =========================
+
+$routes->post('api/applications', 'Application\ApplicationController::create');
+$routes->get('api/applications', 'Application\ApplicationController::index');
+$routes->get('api/applications/(:num)', 'Application\ApplicationController::show/$1');
+$routes->get('api/admin/applications', 'Application\ApplicationController::adminIndex');
+$routes->get('api/admin/evaluations/(:num)', 'Evaluation\EvaluationController::review/$1');
+// =========================
+// EVALUATOR ASSIGNMENT APIs
+// =========================
+
+$routes->get(
+'api/admin/evaluators',
+'Application\ApplicationController::evaluators'
+);
+
+$routes->post(
+'api/admin/assign-evaluator',
+'Application\ApplicationController::assignEvaluator'
+);
+
+$routes->get(
+    'api/evaluator/applications',
+    'Application\ApplicationController::assignedApplications'
+);
+
+// Evaluator Evaluation APIs
+$routes->get(
+    'api/evaluator/parameters/(:num)',
+    'Evaluation\EvaluationController::parameters/$1'
+);
+
+$routes->post(
+    'api/evaluator/submit',
+    'Evaluation\EvaluationController::submit'
+);
+
+$routes->post(
+    'api/admin/evaluations/decision',
+    'Evaluation\EvaluationController::approveReject'
+);
+
+$routes->get('api/verify-certificate', 'Auth::verifyCertificate');
+
+// Certificate Generation
+$routes->get(
+    'admin/certificate/generate/(:segment)',
+    'CertificateController::generate/$1'
+);
+
+$routes->get(
+    'certificate/generate/(:segment)',
+    'CertificateController::generate/$1'
+);
+
+$routes->get(
+    'api/certificate/download/(:segment)',
+    'CertificateController::download/$1'
+);
+
+// Razorpay Payment Routes
+
+$routes->post(
+    'api/payment/create-order',
+    'PaymentController::createOrder'
+);
+
+$routes->post(
+    'api/payment/verify',
+    'PaymentController::verifyPayment'
+);
+
+$routes->get(
+    'api/payment/status/(:num)',
+    'PaymentController::paymentStatus/$1'
+);
+
+$routes->get(
+    'api/startup/status',
+    'Application\ApplicationController::startupStatus'
+);
+
+$routes->get(
+    'api/verified-directory',
+    'Application\ApplicationController::verifiedDirectory'
+);
+
+$routes->get(
+    'api/company/progress',
+    'Company\CompanyController::getWizardProgress'
+);
+
+$routes->put(
+    'api/company/progress',
+    'Company\CompanyController::saveWizardProgress'
+);

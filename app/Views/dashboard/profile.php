@@ -220,96 +220,26 @@
   <!-- Vendor JS Libraries -->
  
   <script>
-// ===== Sidebar toggle =====
-document.getElementById('sidebar-toggle')?.addEventListener('click', function() {
-  document.querySelector('.sidebar').classList.toggle('collapsed');
+   document.getElementById('sidebar-toggle')?.addEventListener('click', function() {
+  const sidebar = document.querySelector('.sidebar');
+  sidebar.classList.toggle('collapsed');
   this.classList.toggle('active');
-  this.style.transform = 'scale(0.85)';
-  setTimeout(() => { this.style.transform = 'scale(1)'; }, 150);
-});
-
-// ===== Logout =====
-document.getElementById('btn-logout')?.addEventListener('click', async function() {
-  await fetch('<?= base_url('api/logout') ?>', { method: 'POST', credentials: 'same-origin' });
-  window.location.href = '<?= base_url('login') ?>';
-});
-
-// ===== Company Profile API =====
-const profileForm = document.getElementById('startup-profile-form');
-
-const fieldMap = {
-  companyName: 'name',
-  founderDetails: 'founder_details',
-  contactEmail: 'contact_email',
-  contactPhone: 'contact_phone',
-  website: 'website',
-  industry: 'industry',
-  location: 'location',
-  yearEstablished: 'year_established',
-  teamSize: 'team_size',
-  companyDescription: 'company_description',
-  problemStatement: 'problem_statement',
-  productService: 'product_service',
-  businessModel: 'business_model',
-  usp: 'usp',
-  technologyUsed: 'technology_used',
-  intellectualProperty: 'intellectual_property'
-};
-
-function buildPayload() {
-  const data = {};
-  const fd = new FormData(profileForm);
-  for (const [key, value] of fd.entries()) {
-    if (fieldMap[key]) data[fieldMap[key]] = value;
-  }
-  if (!data.stage) data.stage = 'Startup';
-  return data;
-}
-
-function fillForm(company) {
-  const reverse = Object.fromEntries(Object.entries(fieldMap).map(([k, v]) => [v, k]));
-  for (const [backendKey, value] of Object.entries(company)) {
-    const formKey = reverse[backendKey];
-    if (formKey && profileForm[formKey]) profileForm[formKey].value = value ?? '';
-  }
-}
-
-async function loadProfile() {
-  const res = await fetch('<?= base_url('api/company') ?>', { credentials: 'same-origin' });
-  if (res.status === 401) { window.location.href = '<?= base_url('login') ?>'; return; }
-  const result = await res.json();
-  if (result.status && result.company) {
-    fillForm(result.company);
-    profileForm.dataset.exists = 'true';
-  }
-}
-
-profileForm.addEventListener('submit', async function(e) {
+  document.getElementById('startup-profile-form').addEventListener('submit', async function(e) {
   e.preventDefault();
-  const method = profileForm.dataset.exists === 'true' ? 'PUT' : 'POST';
-  const res = await fetch('<?= base_url('api/company') ?>', {
-    method: method,
-    credentials: 'same-origin',
-    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-    body: new URLSearchParams(buildPayload())
-  });
+  const res = await fetch('<?= base_url('profile/save') ?>', { method: 'POST' });
   const result = await res.json();
-
-  if (res.status === 401) { window.location.href = '<?= base_url('login') ?>'; return; }
-  if (res.status === 422) { alert(Object.values(result.errors).join('\n')); return; }
-
   if (result.status) {
-    profileForm.dataset.exists = 'true';
-    // Wizard step complete mark karo (session), phir documents pe jao
-    await fetch('<?= base_url('profile/complete') ?>', { method: 'POST', credentials: 'same-origin' });
-    alert(result.message);
+    alert('Profile save ho gaya! Ab Document Manager khul gaya.');
     window.location.href = '<?= base_url('documents') ?>';
   } else {
     alert(result.message || 'Save failed');
   }
 });
-
-loadProfile();
-</script>
+  
+  // Button pe chhota bounce effect
+  this.style.transform = 'scale(0.85)';
+  setTimeout(() => { this.style.transform = 'scale(1)'; }, 150);
+});
+  </script>
 </body>
 </html>
