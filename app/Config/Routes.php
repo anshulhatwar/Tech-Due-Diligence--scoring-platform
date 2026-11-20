@@ -32,6 +32,7 @@ $routes->get('api/me', 'Auth\AuthController::me');
 $routes->post('api/logout', 'Auth\AuthController::logout');
 $routes->post('/documents/save', 'Auth::documentsSave');
 $routes->post('/profile/save', 'Auth::profileSave');
+$routes->post('/profile/complete', 'Auth::profileComplete');
 
 
 // =========================

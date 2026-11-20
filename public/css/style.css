@@ -1078,3 +1078,25 @@ p, .page-desc, .card-desc {
 .verify-section.dark .section-title,
 .verify-section.dark .section-desc { color: #fff; }
 .verify-section { min-height: 320px; display: flex; align-items: center; }
+
+.status-steps { display:flex; flex-direction:column; gap:12px; }
+.status-step {
+  display:flex; gap:14px; align-items:center;
+  padding:12px 14px; border:1px solid var(--light-border);
+  border-radius:var(--radius-md); background:#fff;
+}
+.status-step-num {
+  width:34px; height:34px; border-radius:50%;
+  display:flex; align-items:center; justify-content:center;
+  background:#e2e8f0; color:#475569; font-weight:700; flex-shrink:0;
+}
+.status-step-title { font-weight:700; font-size:0.92rem; }
+.status-step-value { font-size:0.85rem; color:#64748b; }
+.status-step.done .status-step-num { background:var(--primary); color:#fff; }
+.status-step.active .status-step-num { background:#3b82f6; color:#fff; }
+.status-step.locked { opacity:0.6; }
+.sidebar .nav-link.locked { opacity:0.55; cursor:not-allowed; }
+.sidebar .nav-link.locked:hover { transform:none; background:none; }
+.sidebar .nav-sub { display:block; font-size:0.72rem; color:#64748b; margin-left:27px; margin-top:-4px; }
+.sidebar .nav-link.done .nav-sub { color:var(--primary); font-weight:600; }
+.sidebar .nav-link.active-step .nav-sub { color:#3b82f6; font-weight:600; }

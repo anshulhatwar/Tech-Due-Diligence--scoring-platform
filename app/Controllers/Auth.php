@@ -457,4 +457,5 @@ class Auth extends BaseController
             'certificate' => $certificate
         ]);
     }
+
 }

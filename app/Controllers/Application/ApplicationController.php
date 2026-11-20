@@ -175,66 +175,78 @@ class ApplicationController extends BaseController
 
     // List all applications for Admin dashboard
     public function adminIndex()
-    {
-        $session = session();
+{
+    $session = session();
 
-        if (!$session->get('logged_in')) {
-            return $this->response
-                ->setStatusCode(401)
-                ->setJSON([
-                    'status' => false,
-                    'message' => 'Please login first.'
-                ]);
-        }
-
-        if ($session->get('role') !== 'Admin') {
-            return $this->response
-                ->setStatusCode(403)
-                ->setJSON([
-                    'status' => false,
-                    'message' => 'Admin access required.'
-                ]);
-        }
-
-        $db = \Config\Database::connect();
-
-        $applications = $db->table('assessment_applications a')
-            ->select('
-                a.id,
-                a.application_number,
-                a.assessment_type,
-                a.status,
-                a.payment_status,
-                a.created_at,
-                c.name AS company_name
-            ')
-            ->join('companies c', 'c.id = a.company_id', 'left')
-            ->orderBy('a.created_at', 'DESC')
-            ->get()
-            ->getResultArray();
-
-        $totalApplications = count($applications);
-        $underReview = 0;
-
-        foreach ($applications as $application) {
-            if (
-                in_array(
-                    strtolower($application['status'] ?? ''),
-                    ['under review', 'in review', 'under_review'],
-                    true
-                )
-            ) {
-                $underReview++;
-            }
-        }
-
-        return $this->response->setJSON([
-            'status' => true,
-            'total' => $totalApplications,
-            'under_review' => $underReview,
-            'applications' => $applications
-        ]);
+    if (!$session->get('logged_in')) {
+        return $this->response
+            ->setStatusCode(401)
+            ->setJSON([
+                'status' => false,
+                'message' => 'Please login first.'
+            ]);
     }
+
+    if ($session->get('role') !== 'Admin') {
+        return $this->response
+            ->setStatusCode(403)
+            ->setJSON([
+                'status' => false,
+                'message' => 'Admin access required.'
+            ]);
+    }
+
+    $db = \Config\Database::connect();
+
+    $applications = $db->table('assessment_applications a')
+        ->select('
+            a.id,
+            a.application_number,
+            a.assessment_type,
+            a.status,
+            a.payment_status,
+            a.created_at,
+            c.name AS company_name,
+            aa.evaluator_id,
+            aa.status AS assignment_status,
+            u.Name AS assigned_evaluator,
+            e.total_score AS overall_score,
+            e.status AS evaluation_status
+        ')
+        ->join('companies c', 'c.id = a.company_id', 'left')
+        ->join(
+            'application_assignments aa',
+            'aa.application_id = a.id',
+            'left'
+        )
+        ->join('users u', 'u.ID = aa.evaluator_id', 'left')
+        ->join('evaluations e', 'e.application_id = a.id', 'left')
+        ->orderBy('a.created_at', 'DESC')
+        ->get()
+        ->getResultArray();
+
+    $totalApplications = count($applications);
+    $underReview = 0;
+
+    foreach ($applications as $application) {
+        if (
+            in_array(
+                strtolower($application['status'] ?? ''),
+                ['under review', 'in review', 'under_review'],
+                true
+            )
+        ) {
+            $underReview++;
+        }
+    }
+
+    return $this->response->setJSON([
+        'status' => true,
+        'total' => $totalApplications,
+        'under_review' => $underReview,
+        'applications' => $applications
+    ]);
+}
 
 
     // Get available evaluators for Admin
