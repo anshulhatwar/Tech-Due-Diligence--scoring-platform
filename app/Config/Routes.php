@@ -12,6 +12,10 @@ $routes->get('/login', 'Auth::login');
 $routes->get('/dashboard', 'Auth::dashboard');
 $routes->get('/profile', 'Auth::profile');
 $routes->get('/documents', 'Auth::documents');
+$routes->get('evaluator-assignment','Auth::evaluatorAssignment');
+$routes->get('/evaluation-scoring', 'Auth::evaluationScoring');
+$routes->get('/credence-review', 'Auth::credenceReview');
+$routes->get('/certificate-verification', 'Auth::certificateVerification');
 
 $routes->get('/', 'PublicPage::home');
 $routes->get('/home', 'PublicPage::home');
@@ -20,6 +24,7 @@ $routes->get('/admin', 'Auth::adminDashboard');
 $routes->get('/admin/params', 'Auth::adminParams');
 $routes->get('/eval', 'Auth::evalDashboard');
 $routes->get('/verify', 'Auth::verify');
+
 
 
 // =========================
@@ -59,6 +64,9 @@ $routes->get('api/applications', 'Application\ApplicationController::index');
 $routes->get('api/applications/(:num)', 'Application\ApplicationController::show/$1');
 $routes->get('api/admin/applications', 'Application\ApplicationController::adminIndex');
 $routes->get('api/admin/evaluations/(:num)', 'Evaluation\EvaluationController::review/$1');
+// Admin Evaluation Scoring APIs
+$routes->get('api/admin/evaluation/parameters/(:num)','Evaluation\EvaluationController::parameters/$1');
+$routes->post('api/admin/evaluation/submit','Evaluation\EvaluationController::submit');
 // =========================
 // EVALUATOR ASSIGNMENT APIs
 // =========================

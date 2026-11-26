@@ -170,6 +170,45 @@
 
                         Assessment Application
                     </a>
+                    <?php
+$paid = !empty($isPaid);
+
+$workflowLinks = [
+    [
+        'title' => 'Evaluator Assignment',
+        'url' => 'evaluator-assignment'
+    ],
+    [
+        'title' => 'Evaluation & Scoring',
+        'url' => 'evaluation-scoring'
+    ],
+    [
+        'title' => 'Credence Review',
+        'url' => 'credence-review'
+    ],
+    [
+        'title' => 'Certificate & QR Verification',
+        'url' => 'certificate-verification'
+    ]
+];
+?>
+
+<div style="margin-top:15px; padding-top:12px; border-top:1px solid var(--light-border);">
+    <div class="sidebar-title">Assessment Workflow</div>
+
+    <?php foreach ($workflowLinks as $link): ?>
+        <a class="nav-link"
+           href="<?= $paid ? base_url($link['url']) : base_url('apply') ?>"
+           style="<?= !$paid ? 'opacity:0.65;' : '' ?>">
+
+            <span><?= esc($link['title']) ?></span>
+
+            <span style="margin-left:auto;font-size:13px;">
+                <?= $paid ? '✓' : '🔒' ?>
+            </span>
+        </a>
+    <?php endforeach; ?>
+</div>
 
                 </div>
 
@@ -530,6 +569,20 @@
                                     Your Credence Trust Score certificate has been approved.
                                     This verification ID and QR code will be used for public verification.
                                 </p>
+                                <a id="cert-download-btn"
+   href="#"
+   class="btn btn-primary"
+   style="display:none;margin-top:15px;text-decoration:none;"
+   target="_blank">
+    Download Certificate PDF
+</a>
+                                                                <a id="cert-download-btn"
+                                   href="#"
+                                   class="btn btn-primary"
+                                   style="display:none;margin-top:15px;text-decoration:none;"
+                                   target="_blank">
+                                    Download Certificate PDF
+                                </a>
 
                             </div>
 
@@ -780,6 +833,141 @@
 
     <!-- Dashboard JavaScript -->
     <script>
+                // Load real application and evaluation status
+        async function loadStartupStatus() {
+
+            try {
+
+                const response = await fetch(
+                    '<?= base_url('api/startup/status') ?>',
+                    {
+                        method: 'GET',
+                        credentials: 'same-origin',
+                        headers: {
+                            'Accept': 'application/json'
+                        }
+                    }
+                );
+
+                const result = await response.json();
+
+                if (!result.status || !result.latest_application) {
+                    return;
+                }
+
+                const application = result.latest_application;
+
+                // Application Status
+                const appStatus = document.getElementById('eval-app-status');
+
+                if (appStatus) {
+                    appStatus.textContent =
+                        application.application_status || 'Not Submitted';
+                }
+
+                // Evaluation Status
+                const evaluationStatus =
+                    document.getElementById('eval-status-badge');
+
+                const scoringStatus =
+                    document.getElementById('eval-scoring');
+
+                let displayStatus = 'Not Started';
+
+                if (application.evaluation_status === 'Approved') {
+                    displayStatus = 'Evaluation Completed';
+                } else if (application.evaluation_status === 'Rejected') {
+                    displayStatus = 'Evaluation Rejected';
+                } else if (application.evaluation_status === 'Submitted') {
+                    displayStatus = 'Under Evaluation';
+                } else if (application.payment_status === 'Pending') {
+                    displayStatus = 'Payment Pending';
+                }
+
+                if (evaluationStatus) {
+                    evaluationStatus.textContent = displayStatus;
+                }
+
+                if (scoringStatus) {
+                    scoringStatus.textContent = displayStatus;
+                }
+
+                // Do not reveal Admin or Evaluator identity
+                const evaluator = document.getElementById('eval-evaluator');
+
+                if (evaluator) {
+                    evaluator.textContent = 'Credence Review Team';
+                }
+
+                // Final Trust Score
+                const finalScore =
+                    document.getElementById('eval-final-score');
+
+                if (finalScore) {
+
+                    if (
+                        application.final_score !== null &&
+                        application.final_score !== undefined &&
+                        application.final_score !== ''
+                    ) {
+
+                        finalScore.textContent =
+                            Number(application.final_score).toFixed(2) + ' / 100';
+
+                    } else {
+
+                        finalScore.textContent = '-- / 100';
+
+                    }
+
+                }
+                                // Certificate Download
+                const certificateCard =
+                    document.getElementById('certificate-card');
+
+                const certificateButton =
+                    document.getElementById('cert-download-btn');
+
+                const certificateReady =
+                    application.evaluation_status === 'Approved' &&
+                    application.verification_id &&
+                    application.certificate_issued_at &&
+                    application.certificate_path &&
+                    application.certificate_download_url;
+
+                if (certificateReady) {
+
+                    showCertificate(application.verification_id);
+
+                    if (certificateButton) {
+                        certificateButton.href =
+                            application.certificate_download_url;
+
+                        certificateButton.style.display = 'inline-block';
+                    }
+
+                } else {
+
+                    if (certificateCard) {
+                        certificateCard.style.display = 'none';
+                    }
+
+                    if (certificateButton) {
+                        certificateButton.style.display = 'none';
+                    }
+
+                }
+
+            } catch (error) {
+
+                console.error('Startup status loading failed:', error);
+
+            }
+
+        }
+
+        // Load status when dashboard opens
+        loadStartupStatus();
 
         // Animate only numeric metric values.
         function animateCount(el, target, duration = 1200) {
@@ -920,4 +1108,4 @@
 
 </body>
 
-</html>
+</html

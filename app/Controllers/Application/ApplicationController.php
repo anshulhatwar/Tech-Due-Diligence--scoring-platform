@@ -199,33 +199,41 @@ class ApplicationController extends BaseController
     $db = \Config\Database::connect();
 
     $applications = $db->table('assessment_applications a')
-        ->select('
-            a.id,
-            a.application_number,
-            a.assessment_type,
-            a.status,
-            a.payment_status,
-            a.created_at,
-            c.name AS company_name,
-            aa.evaluator_id,
-            aa.status AS assignment_status,
-            u.Name AS assigned_evaluator,
-            e.total_score AS overall_score,
-            e.status AS evaluation_status
-        ')
-        ->join('companies c', 'c.id = a.company_id', 'left')
-        ->join(
-            'application_assignments aa',
-            'aa.application_id = a.id',
-            'left'
-        )
-        ->join('users u', 'u.ID = aa.evaluator_id', 'left')
-        ->join('evaluations e', 'e.application_id = a.id', 'left')
-        ->orderBy('a.created_at', 'DESC')
-        ->get()
-        ->getResultArray();
+    ->select('
+        a.id,
+        a.company_id,
+        a.application_number,
+        a.assessment_type,
+        a.status,
+        a.payment_status,
+        a.created_at,
+        c.name AS company_name,
+        aa.assigned_evaluator_name AS assigned_evaluator,
+        aa.status AS assignment_status,
+        e.total_score AS overall_score,
+e.status AS evaluation_status,
+e.verification_id,
+e.certificate_issued_at,
+e.certificate_path
+    ')
+    ->join('companies c', 'c.id = a.company_id', 'left')
+    ->join(
+        'application_assignments aa',
+        'aa.application_id = a.id',
+        'left'
+    )
+    ->join('evaluations e', 'e.application_id = a.id', 'left')
+    ->orderBy('a.created_at', 'DESC')
+    ->get()
+    ->getResultArray();
+    // Calculate total received assessment revenue
+$revenueData = $db->table('assessment_applications')
+    ->selectSum('payment_amount', 'total_revenue')
+    ->where('payment_status', 'Paid')
+    ->get()
+    ->getRowArray();
 
-    $totalApplications = count($applications);
+$totalRevenue = (float) ($revenueData['total_revenue'] ?? 0);
     $underReview = 0;
 
     foreach ($applications as $application) {
@@ -242,164 +250,171 @@ class ApplicationController extends BaseController
 
     return $this->response->setJSON([
         'status' => true,
-        'total' => $totalApplications,
+        'total' => count($applications),
         'under_review' => $underReview,
+        'total_revenue' => $totalRevenue,
         'applications' => $applications
     ]);
 }
 
 
     // Get available evaluators for Admin
-    public function evaluators()
-    {
-        $session = session();
+    // Get Credence team display names for Admin assignment
+public function evaluators()
+{
+    $session = session();
 
-        if (!$session->get('logged_in')) {
-            return $this->response
-                ->setStatusCode(401)
-                ->setJSON([
-                    'status' => false,
-                    'message' => 'Please login first.'
-                ]);
-        }
-
-        if ($session->get('role') !== 'Admin') {
-            return $this->response
-                ->setStatusCode(403)
-                ->setJSON([
-                    'status' => false,
-                    'message' => 'Admin access required.'
-                ]);
-        }
-
-        $db = \Config\Database::connect();
-
-        $evaluators = $db->table('users')
-            ->select('ID AS id, Name AS name, Email AS email')
-            ->where('Role', 'Evaluator')
-            ->get()
-            ->getResultArray();
-
-        return $this->response->setJSON([
-            'status' => true,
-            'evaluators' => $evaluators
-        ]);
+    if (!$session->get('logged_in')) {
+        return $this->response
+            ->setStatusCode(401)
+            ->setJSON([
+                'status' => false,
+                'message' => 'Please login first.'
+            ]);
     }
+
+    if ($session->get('role') !== 'Admin') {
+        return $this->response
+            ->setStatusCode(403)
+            ->setJSON([
+                'status' => false,
+                'message' => 'Admin access required.'
+            ]);
+    }
+
+    return $this->response->setJSON([
+        'status' => true,
+        'evaluators' => [
+            ['name' => 'Anshul'],
+            ['name' => 'Madhur'],
+            ['name' => 'Aryan']
+        ]
+    ]);
+}
 
 
     // Assign application to an Evaluator
-    public function assignEvaluator()
-    {
-        $session = session();
+   // Assign application to a Credence team member
+public function assignEvaluator()
+{
+    $session = session();
 
-        if (!$session->get('logged_in')) {
-            return $this->response
-                ->setStatusCode(401)
-                ->setJSON([
-                    'status' => false,
-                    'message' => 'Please login first.'
-                ]);
-        }
-
-        if ($session->get('role') !== 'Admin') {
-            return $this->response
-                ->setStatusCode(403)
-                ->setJSON([
-                    'status' => false,
-                    'message' => 'Admin access required.'
-                ]);
-        }
-
-        $applicationId = (int) $this->request->getPost('application_id');
-        $evaluatorId = (int) $this->request->getPost('evaluator_id');
-
-        if ($applicationId <= 0 || $evaluatorId <= 0) {
-            return $this->response
-                ->setStatusCode(422)
-                ->setJSON([
-                    'status' => false,
-                    'message' => 'Valid application_id and evaluator_id are required.'
-                ]);
-        }
-
-        $db = \Config\Database::connect();
-
-        // Check application exists
-        $application = $db->table('assessment_applications')
-            ->where('id', $applicationId)
-            ->get()
-            ->getRowArray();
-
-        if (!$application) {
-            return $this->response
-                ->setStatusCode(404)
-                ->setJSON([
-                    'status' => false,
-                    'message' => 'Application not found.'
-                ]);
-        }
-
-        // Check selected user is an Evaluator
-        $evaluator = $db->table('users')
-            ->where('ID', $evaluatorId)
-            ->where('Role', 'Evaluator')
-            ->get()
-            ->getRowArray();
-
-        if (!$evaluator) {
-            return $this->response
-                ->setStatusCode(422)
-                ->setJSON([
-                    'status' => false,
-                    'message' => 'Selected user is not an Evaluator.'
-                ]);
-        }
-
-        $assignmentModel = new AssignmentModel();
-
-        // Check existing assignment
-        $existing = $assignmentModel
-            ->where('application_id', $applicationId)
-            ->first();
-
-        $assignmentData = [
-            'application_id' => $applicationId,
-            'evaluator_id' => $evaluatorId,
-            'assigned_by' => (int) $session->get('user_id'),
-            'status' => 'Assigned',
-            'assigned_at' => date('Y-m-d H:i:s')
-        ];
-
-        if ($existing) {
-            $saved = $assignmentModel->update(
-                $existing['id'],
-                $assignmentData
-            );
-        } else {
-            $saved = $assignmentModel->insert($assignmentData);
-        }
-
-        if (!$saved) {
-            return $this->response
-                ->setStatusCode(500)
-                ->setJSON([
-                    'status' => false,
-                    'message' => 'Failed to assign evaluator.',
-                    'errors' => $assignmentModel->errors()
-                ]);
-        }
-
-        return $this->response->setJSON([
-            'status' => true,
-            'message' => 'Evaluator assigned successfully.',
-            'assignment' => [
-                'application_id' => $applicationId,
-                'evaluator_id' => $evaluatorId,
-                'evaluator_name' => $evaluator['Name'],
-                'status' => 'Assigned'
-            ]
-        ]);
+    if (!$session->get('logged_in')) {
+        return $this->response
+            ->setStatusCode(401)
+            ->setJSON([
+                'status' => false,
+                'message' => 'Please login first.'
+            ]);
     }
+
+    if ($session->get('role') !== 'Admin') {
+        return $this->response
+            ->setStatusCode(403)
+            ->setJSON([
+                'status' => false,
+                'message' => 'Admin access required.'
+            ]);
+    }
+
+    $applicationId = (int) $this->request->getPost('application_id');
+    $evaluatorName = trim(
+        (string) $this->request->getPost('evaluator_name')
+    );
+
+    $allowedNames = ['Anshul', 'Madhur', 'Aryan'];
+
+    if (
+        $applicationId <= 0 ||
+        !in_array($evaluatorName, $allowedNames, true)
+    ) {
+        return $this->response
+            ->setStatusCode(422)
+            ->setJSON([
+                'status' => false,
+                'message' => 'Select a valid application and team member.'
+            ]);
+    }
+
+    $db = \Config\Database::connect();
+
+    // Verify application exists
+    $application = $db->table('assessment_applications')
+        ->where('id', $applicationId)
+        ->get()
+        ->getRowArray();
+
+    if (!$application) {
+        return $this->response
+            ->setStatusCode(404)
+            ->setJSON([
+                'status' => false,
+                'message' => 'Application not found.'
+            ]);
+    }
+
+    // Admin ID is used internally to satisfy the evaluator_id foreign key.
+    $adminId = (int) $session->get('user_id');
+
+    $admin = $db->table('users')
+        ->where('ID', $adminId)
+        ->where('Role', 'Admin')
+        ->get()
+        ->getRowArray();
+
+    if (!$admin) {
+        return $this->response
+            ->setStatusCode(403)
+            ->setJSON([
+                'status' => false,
+                'message' => 'Valid Admin account not found.'
+            ]);
+    }
+
+    $assignmentModel = new \App\Models\AssignmentModel();
+
+    $existing = $assignmentModel
+        ->where('application_id', $applicationId)
+        ->first();
+
+    $assignmentData = [
+        'application_id' => $applicationId,
+        'evaluator_id' => $adminId,
+        'assigned_evaluator_name' => $evaluatorName,
+        'assigned_by' => $adminId,
+        'status' => 'Assigned',
+        'assigned_at' => date('Y-m-d H:i:s')
+    ];
+
+    if ($existing) {
+        $saved = $assignmentModel->update(
+            $existing['id'],
+            $assignmentData
+        );
+    } else {
+        $saved = $assignmentModel->insert($assignmentData);
+    }
+
+    if (!$saved) {
+        return $this->response
+            ->setStatusCode(500)
+            ->setJSON([
+                'status' => false,
+                'message' => 'Failed to assign team member.',
+                'errors' => $assignmentModel->errors()
+            ]);
+    }
+
+    return $this->response->setJSON([
+        'status' => true,
+        'message' => $evaluatorName . ' assigned successfully.',
+        'assignment' => [
+            'application_id' => $applicationId,
+            'evaluator_name' => $evaluatorName,
+            'status' => 'Assigned'
+        ]
+    ]);
+}
 
 
     // Get applications assigned to logged-in Evaluator
@@ -452,6 +467,7 @@ class ApplicationController extends BaseController
             ->orderBy('aa.assigned_at', 'DESC')
             ->get()
             ->getResultArray();
+            $totalApplications = count($applications);
 
         return $this->response->setJSON([
             'status' => true,
@@ -487,40 +503,30 @@ class ApplicationController extends BaseController
         $db = \Config\Database::connect();
 
         $applications = $db->table('assessment_applications a')
-            ->select('
-                a.id AS application_id,
-                a.application_number,
-                a.assessment_type,
-                a.status AS application_status,
-                a.payment_status,
-                a.submitted_at,
-                aa.evaluator_id,
-                u.Name AS evaluator_name,
-                e.status AS evaluation_status,
-                e.total_score AS final_score,
-                e.verification_id,
-                e.certificate_issued_at,
-                e.certificate_path
-            ')
-            ->join(
-                'application_assignments aa',
-                'aa.application_id = a.id',
-                'left'
-            )
-            ->join(
-                'users u',
-                'u.ID = aa.evaluator_id',
-                'left'
-            )
-            ->join(
-                'evaluations e',
-                'e.application_id = a.id',
-                'left'
-            )
-            ->where('a.user_id', $userId)
-            ->orderBy('a.created_at', 'DESC')
-            ->get()
-            ->getResultArray();
+    ->select('
+        a.id,
+        a.company_id,
+        a.application_number,
+        a.assessment_type,
+        a.status,
+        a.payment_status,
+        a.created_at,
+        c.name AS company_name,
+        aa.assigned_evaluator_name AS assigned_evaluator,
+        aa.status AS assignment_status,
+        e.total_score AS overall_score,
+        e.status AS evaluation_status
+    ')
+    ->join('companies c', 'c.id = a.company_id', 'left')
+    ->join(
+        'application_assignments aa',
+        'aa.application_id = a.id',
+        'left'
+    )
+    ->join('evaluations e', 'e.application_id = a.id', 'left')
+    ->orderBy('a.created_at', 'DESC')
+    ->get()
+    ->getResultArray();
 
         foreach ($applications as &$application) {
 

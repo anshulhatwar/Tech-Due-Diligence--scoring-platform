@@ -44,6 +44,24 @@ class Auth extends BaseController
         $data['evaluationStatus'] = 'Pending';
         $data['finalScore'] = '-- / 100';
         $data['documents'] = [];
+        // Payment Unlock Status
+$data['isPaid'] = false;
+$data['paymentStatus'] = 'Unpaid';
+
+if ($db->tableExists('assessment_applications')) {
+
+    $paidApplication = $db->table('assessment_applications')
+        ->where('user_id', $userId)
+        ->where('payment_status', 'Paid')
+        ->orderBy('id', 'DESC')
+        ->get()
+        ->getRowArray();
+
+    if ($paidApplication) {
+        $data['isPaid'] = true;
+        $data['paymentStatus'] = 'Paid';
+    }
+}
 
         if ($company) {
 
@@ -120,6 +138,384 @@ class Auth extends BaseController
 
         return view('dashboard/startup', $data);
     }
+    // Evaluator Assignment Page
+public function evaluatorAssignment()
+{
+    if (!session()->get('logged_in')) {
+        return redirect()->to(base_url('login'));
+    }
+
+    $data = $this->userData();
+
+    $userId = (int) session()->get('user_id');
+    $db = \Config\Database::connect();
+
+    $data['isPaid'] = false;
+    $data['paymentStatus'] = 'Unpaid';
+    $data['evaluatorName'] = 'Not Assigned Yet';
+    $data['assignmentStatus'] = 'Pending';
+    $data['assignmentDate'] = null;
+    $data['applicationNumber'] = null;
+
+    // Fetch latest application of logged-in company
+    $application = $db->table('assessment_applications')
+        ->where('user_id', $userId)
+        ->orderBy('id', 'DESC')
+        ->get()
+        ->getRowArray();
+
+    if ($application) {
+
+        $data['paymentStatus'] =
+            $application['payment_status'] ?? 'Unpaid';
+
+        $data['isPaid'] =
+            strtolower((string) $data['paymentStatus']) === 'paid';
+
+        $data['applicationNumber'] =
+            $application['application_number'] ?? null;
+
+        // Fetch actual evaluator assignment
+        $assignment = $db->table('application_assignments')
+            ->where('application_id', $application['id'])
+            ->get()
+            ->getRowArray();
+
+        if ($assignment) {
+
+            $data['evaluatorName'] =
+                $assignment['assigned_evaluator_name'] ?: 'Not Assigned Yet';
+
+            $data['assignmentStatus'] =
+                $assignment['status'] ?? 'Pending';
+
+            $data['assignmentDate'] =
+                $assignment['assigned_at'] ?? null;
+        }
+    }
+
+    return view('dashboard/evaluator_assignment', $data);
+}
+// Evaluation & Scoring Page
+public function evaluationScoring()
+{
+    if (!session()->get('logged_in')) {
+        return redirect()->to(base_url('login'));
+    }
+
+    $data = $this->userData();
+
+    $userId = (int) session()->get('user_id');
+    $db = \Config\Database::connect();
+
+    $data['isPaid'] = false;
+    $data['paymentStatus'] = 'Unpaid';
+    $data['evaluatorName'] = 'Not Assigned Yet';
+    $data['evaluationStatus'] = 'Not Started';
+    $data['finalScore'] = '-- / 100';
+    $data['evaluationParameters'] = [];
+    $data['applicationNumber'] = null;
+    $data['evaluationComments'] = null;
+
+    // Fetch latest application
+    $application = $db->table('assessment_applications')
+        ->where('user_id', $userId)
+        ->orderBy('id', 'DESC')
+        ->get()
+        ->getRowArray();
+
+    if ($application) {
+
+        $data['paymentStatus'] =
+            $application['payment_status'] ?? 'Unpaid';
+
+        $data['isPaid'] =
+            strtolower((string) $data['paymentStatus']) === 'paid';
+
+        $data['applicationNumber'] =
+            $application['application_number'] ?? null;
+
+        // Fetch assigned display name
+        $assignment = $db->table('application_assignments')
+            ->where('application_id', $application['id'])
+            ->get()
+            ->getRowArray();
+
+        if ($assignment) {
+            $data['evaluatorName'] =
+                $assignment['assigned_evaluator_name'] ?: 'Not Assigned Yet';
+        }
+
+        // Fetch evaluation record
+        $evaluation = $db->table('evaluations')
+            ->where('application_id', $application['id'])
+            ->get()
+            ->getRowArray();
+
+        $scoreMap = [];
+
+        if ($evaluation) {
+
+            $data['evaluationStatus'] =
+                $evaluation['status'] ?? 'Submitted';
+
+            $data['finalScore'] =
+                number_format((float) $evaluation['total_score'], 2) . ' / 100';
+
+            $data['evaluationComments'] =
+                $evaluation['comments'] ?? null;
+
+            // Fetch actual parameter scores
+            $scores = $db->table('evaluation_scores')
+                ->where('evaluation_id', $evaluation['id'])
+                ->get()
+                ->getResultArray();
+
+            foreach ($scores as $score) {
+                $scoreMap[(int) $score['parameter_id']] = $score;
+            }
+        }
+
+        // Fetch all active evaluation parameters
+        $parameters = $db->table('evaluation_parameters')
+            ->where('is_active', 1)
+            ->orderBy('id', 'ASC')
+            ->get()
+            ->getResultArray();
+
+        foreach ($parameters as $parameter) {
+
+            $parameterId = (int) $parameter['id'];
+            $savedScore = $scoreMap[$parameterId] ?? null;
+
+            $data['evaluationParameters'][] = [
+                'parameter_name' => $parameter['parameter_name'],
+                'weight' => $parameter['weight'],
+                'score' => $savedScore['score'] ?? null,
+                'weighted_score' => $savedScore['weighted_score'] ?? null
+            ];
+        }
+    }
+
+    return view('dashboard/evaluation_scoring', $data);
+}
+// =========================
+// CREDENCE REVIEW PAGE
+// =========================
+
+public function credenceReview()
+{
+    if (!session()->get('logged_in')) {
+        return redirect()->to(base_url('login'));
+    }
+
+    $data = $this->userData();
+
+    $userId = (int) session()->get('user_id');
+    $db = \Config\Database::connect();
+
+    $data['isPaid'] = false;
+    $data['paymentStatus'] = 'Unpaid';
+    $data['reviewStatus'] = 'Not Started';
+    $data['evaluationStatus'] = 'Not Started';
+    $data['finalDecision'] = 'Awaiting';
+    $data['adminRemarks'] = 'Awaiting Review';
+    $data['reviewDate'] = null;
+    $data['finalScore'] = '-- / 100';
+    $data['applicationNumber'] = null;
+
+    // Latest application of logged-in company
+    $application = $db->table('assessment_applications')
+        ->where('user_id', $userId)
+        ->orderBy('id', 'DESC')
+        ->get()
+        ->getRowArray();
+
+    if ($application) {
+
+        $data['paymentStatus'] =
+            $application['payment_status'] ?? 'Unpaid';
+
+        $data['isPaid'] =
+            strtolower((string) $data['paymentStatus']) === 'paid';
+
+        $data['applicationNumber'] =
+            $application['application_number'] ?? null;
+
+        // Fetch actual evaluation
+        $evaluation = $db->table('evaluations')
+            ->where('application_id', $application['id'])
+            ->get()
+            ->getRowArray();
+
+        if ($evaluation) {
+
+            $data['evaluationStatus'] =
+                $evaluation['status'] ?? 'Submitted';
+
+            $data['finalScore'] =
+                number_format((float) $evaluation['total_score'], 2) . ' / 100';
+
+            $data['adminRemarks'] =
+                !empty($evaluation['admin_remarks'])
+                    ? $evaluation['admin_remarks']
+                    : 'No review remarks provided yet.';
+
+            $data['reviewDate'] =
+                $evaluation['reviewed_at'] ?? null;
+
+            $status = strtolower((string) ($evaluation['status'] ?? ''));
+
+            if ($status === 'approved') {
+                $data['reviewStatus'] = 'Completed';
+                $data['finalDecision'] = 'Approved';
+            } elseif ($status === 'rejected') {
+                $data['reviewStatus'] = 'Completed';
+                $data['finalDecision'] = 'Rejected';
+            } else {
+                $data['reviewStatus'] = 'In Progress';
+                $data['finalDecision'] = 'Awaiting';
+            }
+        }
+    }
+
+    return view('dashboard/credence_review', $data);
+}
+public function certificateVerification()
+{
+    if (!session()->get('logged_in')) {
+        return redirect()->to(base_url('login'));
+    }
+
+    $data = $this->userData();
+
+    $userId = (int) session()->get('user_id');
+    $db = \Config\Database::connect();
+
+    // Default values
+    $data['isPaid'] = false;
+    $data['paymentStatus'] = 'Unpaid';
+
+    $data['certificateStatus'] = 'Not Issued';
+    $data['verificationStatus'] = 'Not Issued';
+    $data['qrStatus'] = 'Not Available';
+
+    $data['verificationId'] = null;
+    $data['finalScore'] = '-- / 100';
+    $data['approvalStatus'] = 'Awaiting';
+    $data['issueDate'] = null;
+
+    $data['downloadUrl'] = null;
+    $data['verificationUrl'] = base_url('verify');
+
+    $data['qrImageData'] = null;
+    $data['isCertificateGenerated'] = false;
+
+    // Fetch latest company application
+    $application = $db->table('assessment_applications')
+        ->where('user_id', $userId)
+        ->orderBy('id', 'DESC')
+        ->get()
+        ->getRowArray();
+
+    if ($application) {
+
+        $data['paymentStatus'] =
+            $application['payment_status'] ?? 'Unpaid';
+
+        $data['isPaid'] =
+            strtolower((string) $data['paymentStatus']) === 'paid';
+
+        // Fetch evaluation
+        $evaluation = $db->table('evaluations')
+            ->where('application_id', $application['id'])
+            ->get()
+            ->getRowArray();
+
+        if ($evaluation) {
+
+            $verificationId = $evaluation['verification_id'] ?? null;
+
+            $data['verificationId'] = $verificationId;
+
+            $data['finalScore'] =
+                number_format((float) ($evaluation['total_score'] ?? 0), 2)
+                . ' / 100';
+
+            $data['approvalStatus'] =
+                $evaluation['status'] ?? 'Pending';
+
+            $data['issueDate'] =
+                $evaluation['certificate_issued_at'] ?? null;
+
+            if (!empty($verificationId)) {
+
+                $data['verificationUrl'] =
+                    site_url('verify') . '?id=' . urlencode($verificationId);
+
+                $safeId = preg_replace(
+                    '/[^A-Za-z0-9_-]/',
+                    '',
+                    $verificationId
+                );
+
+                // Check actual PDF file
+                $pdfPath = WRITEPATH
+                    . 'uploads/certificates/certificate_'
+                    . $safeId
+                    . '.pdf';
+
+                // Check actual QR image
+                $qrPath = WRITEPATH
+                    . 'uploads/certificates/qr_'
+                    . $safeId
+                    . '.png';
+
+                $pdfExists = is_file($pdfPath);
+                $qrExists = is_file($qrPath);
+
+                $isApproved =
+                    strtolower((string) $data['approvalStatus']) === 'approved';
+
+                if (
+                    $isApproved &&
+                    $data['isPaid'] &&
+                    !empty($data['issueDate']) &&
+                    !empty($evaluation['certificate_path']) &&
+                    $pdfExists
+                ) {
+                    $data['isCertificateGenerated'] = true;
+
+                    $data['certificateStatus'] = 'Generated';
+                    $data['verificationStatus'] = 'Valid';
+
+                    $data['downloadUrl'] = base_url(
+                        'api/certificate/download/' . urlencode($verificationId)
+                    );
+
+                    if ($qrExists) {
+                        $data['qrStatus'] = 'Available';
+
+                        $data['qrImageData'] = 'data:image/png;base64,'
+                            . base64_encode(file_get_contents($qrPath));
+                    }
+                } elseif (!$isApproved) {
+
+                    $data['certificateStatus'] = 'Awaiting Approval';
+                    $data['verificationStatus'] = 'Not Issued';
+
+                } else {
+
+                    $data['certificateStatus'] = 'Pending Generation';
+                    $data['verificationStatus'] = 'Not Issued';
+                }
+            }
+        }
+    }
+
+    return view('dashboard/certificate_verification', $data);
+}
+    
 
     // =========================
     // COMPANY PROFILE
@@ -368,6 +764,7 @@ class Auth extends BaseController
             'message' => 'Company profile saved successfully.'
         ]);
     }
+    
 
     // =========================
     // USER DATA
@@ -389,6 +786,7 @@ class Auth extends BaseController
             'userInitials' => $initials ?: 'U',
         ];
     }
+    
 
     // =========================
     // PUBLIC CERTIFICATE PAGE

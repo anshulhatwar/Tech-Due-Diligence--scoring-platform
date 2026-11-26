@@ -157,6 +157,7 @@
                             <th>Assessment Type</th>
                             <th>Status</th>
                             <th>Payment</th>
+                            <th>Evaluator Assignment</th>
                             <th>Actions</th>
                         </tr>
                     </thead>
@@ -165,7 +166,7 @@
                     <tbody id="applications-table">
 
                         <tr>
-                            <td colspan="6" style="text-align:center;">
+                            <td colspan="7" style="text-align:center;">
                                 Loading applications...
                             </td>
                         </tr>
@@ -208,6 +209,76 @@
         <div id="review-loading" style="padding:15px;">
             Loading evaluation details...
         </div>
+        <!-- Admin Scoring Form -->
+
+<div id="scoring-content" style="display:none;">
+
+    <div style="background:#eff6ff;padding:15px;border-radius:10px;margin-bottom:20px;">
+        <h3 style="margin-bottom:8px;">Application Evaluation</h3>
+
+        <p>
+            Application Number:
+            <strong id="scoring-app-number">--</strong>
+        </p>
+
+        <p>
+            Company:
+            <strong id="scoring-company">--</strong>
+        </p>
+
+        <p>
+            Payment Status:
+            <strong id="scoring-payment">--</strong>
+        </p>
+    </div>
+
+    <h3 style="margin-bottom:15px;">Score Evaluation Parameters</h3>
+
+    <div id="scoring-parameters"></div>
+
+    <div style="background:#f8fafc;padding:15px;border-radius:10px;margin-top:20px;">
+
+        <h3>
+            Calculated Trust Score:
+            <span id="calculated-total" style="color:var(--primary);">0.00</span>
+            / 100
+        </h3>
+
+    </div>
+
+    <div class="form-group" style="margin-top:20px;">
+
+        <label class="form-label">Admin Evaluation Remarks</label>
+
+        <textarea
+            id="scoring-comments"
+            class="form-control"
+            rows="4"
+            placeholder="Enter evaluation remarks..."
+        ></textarea>
+
+    </div>
+
+    <div style="display:flex;justify-content:flex-end;gap:10px;margin-top:20px;">
+
+        <button type="button" class="btn btn-secondary" onclick="closeReview()">
+            Cancel
+        </button>
+
+        <button
+            type="button"
+            class="btn btn-success"
+            id="submit-scoring-button"
+            onclick="submitScoring()"
+        >
+            Submit Evaluation
+        </button>
+
+    </div>
+
+    <div id="scoring-message" role="status" style="margin-top:15px;"></div>
+
+</div>
 
 
         <div id="review-content" style="display:none;">
@@ -336,11 +407,22 @@
 const adminApplicationsUrl =
     <?= json_encode(base_url('api/admin/applications')) ?>;
 
+    const certificateGenerateUrl =
+    <?= json_encode(base_url('admin/certificate/generate/')) ?>;
+
+const certificateDownloadUrl =
+    <?= json_encode(base_url('api/certificate/download/')) ?>;
+
 const reviewUrl =
     <?= json_encode(base_url('api/admin/evaluations/')) ?>;
 
 const decisionUrl =
     <?= json_encode(base_url('api/admin/evaluations/decision')) ?>;
+    const scoringParametersUrl =
+    <?= json_encode(base_url('api/admin/evaluation/parameters/')) ?>;
+
+const scoringSubmitUrl =
+    <?= json_encode(base_url('api/admin/evaluation/submit')) ?>;
 
 const logoutUrl =
     <?= json_encode(base_url('api/logout')) ?>;
@@ -351,6 +433,8 @@ const loginUrl =
 
 let currentReviewApplicationId = null;
 let decisionInProgress = false;
+let currentScoringParameters = [];
+let scoringInProgress = false;
 
 
 // ===============================
@@ -394,12 +478,11 @@ function escapeHtml(value) {
 async function loadApplications() {
 
     const table = document.getElementById('applications-table');
-
     const message = document.getElementById('dashboard-message');
 
     table.innerHTML = `
         <tr>
-            <td colspan="6" style="text-align:center;">
+            <td colspan="7" style="text-align:center;">
                 Loading applications...
             </td>
         </tr>
@@ -410,137 +493,232 @@ async function loadApplications() {
     try {
 
         const response = await fetch(adminApplicationsUrl, {
-
             method: 'GET',
-
             credentials: 'same-origin',
-
             headers: {
                 'Accept': 'application/json'
             }
-
         });
 
         const data = await response.json();
 
         if (!response.ok || !data.status) {
-
             throw new Error(data.message || 'Unable to load applications.');
-
         }
 
         const applications = data.applications || [];
 
-
-        // Total Applications
-
         document.getElementById('total-applications').textContent =
             data.total ?? applications.length;
 
-
-        // Under Review
-
         document.getElementById('under-review').textContent =
-            applications.filter(app => {
-
-                return ['submitted', 'under review', 'in review', 'under_review']
-                    .includes(String(app.status || '').toLowerCase());
-
-            }).length;
-
-
-        // Approved Applications
+            applications.filter(app =>
+                ['submitted', 'under review', 'in review', 'under_review']
+                    .includes(String(app.status || '').toLowerCase())
+            ).length;
 
         document.getElementById('active-verifications').textContent =
-            applications.filter(app => {
+            applications.filter(app =>
+                ['approved', 'verified', 'certified']
+                    .includes(String(app.status || '').toLowerCase())
+            ).length;
 
-                return ['approved', 'verified', 'certified']
-                    .includes(String(app.status || '').toLowerCase());
+        const revenue = Number(data.total_revenue || 0);
 
-            }).length;
-
-
-        // Payment Revenue
-
-        document.getElementById('assessment-revenue').textContent = '₹0';
-
+document.getElementById('assessment-revenue').textContent =
+    '\u20B9' + revenue.toLocaleString('en-IN', {
+        maximumFractionDigits: 2
+    });
 
         if (applications.length === 0) {
-
             table.innerHTML = `
                 <tr>
-                    <td colspan="6" style="text-align:center;">
+                    <td colspan="7" style="text-align:center;">
                         No applications found.
                     </td>
                 </tr>
             `;
-
             return;
-
         }
 
+        table.innerHTML = applications.map(app => {
 
-        // Display Applications
+            const selectedName = app.assigned_evaluator || '';
 
-        table.innerHTML = applications.map(app => `
+            const canGenerateCertificate =
+    String(app.status || '').toLowerCase() === 'approved' &&
+    String(app.payment_status || '').toLowerCase() === 'paid' &&
+    String(app.evaluation_status || '').toLowerCase() === 'approved' &&
+    !!app.verification_id;
 
-            <tr>
+const certificateGenerated =
+    canGenerateCertificate &&
+    !!app.certificate_issued_at &&
+    !!app.certificate_path;
 
-                <td>
-                    ${escapeHtml(app.company_name || 'Company #' + (app.company_id || 'N/A'))}
-                </td>
+            return `
+                <tr>
 
-                <td>
-                    ${escapeHtml(app.application_number || 'N/A')}
-                </td>
+                    <td>
+                        ${escapeHtml(app.company_name || 'Company #' + (app.company_id || 'N/A'))}
+                    </td>
 
-                <td>
-                    ${escapeHtml(app.assessment_type || 'N/A')}
-                </td>
+                    <td>
+                        ${escapeHtml(app.application_number || 'N/A')}
+                    </td>
 
-                <td>
-                    <span class="badge badge-new">
-                        ${escapeHtml(app.status || 'Submitted')}
-                    </span>
-                </td>
+                    <td>
+                        ${escapeHtml(app.assessment_type || 'N/A')}
+                    </td>
 
-                <td>
-                    ${escapeHtml(app.payment_status || 'Pending')}
-                </td>
+                    <td>
+                        <span class="badge badge-new">
+                            ${escapeHtml(app.status || 'Submitted')}
+                        </span>
+                    </td>
 
-                <td>
+                    <td>
+                        ${escapeHtml(app.payment_status || 'Pending')}
+                    </td>
 
-                    <button
-                        type="button"
-                        class="btn btn-primary btn-sm view-application"
-                        data-id="${Number(app.id)}">
+                    <td>
+                        <select class="evaluator-select"
+                                data-id="${Number(app.id)}"
+                                style="padding:7px;width:130px;">
 
-                        View
+                            <option value="">Select Member</option>
 
-                    </button>
+                            <option value="Anshul" ${selectedName === 'Anshul' ? 'selected' : ''}>
+                                Anshul
+                            </option>
 
-                </td>
+                            <option value="Madhur" ${selectedName === 'Madhur' ? 'selected' : ''}>
+                                Madhur
+                            </option>
 
-            </tr>
+                            <option value="Aryan" ${selectedName === 'Aryan' ? 'selected' : ''}>
+                                Aryan
+                            </option>
 
-        `).join('');
+                        </select>
 
+                        <button type="button"
+                                class="btn btn-primary btn-sm save-evaluator"
+                                data-id="${Number(app.id)}"
+                                style="margin-top:5px;">
+                            Save Assignment
+                        </button>
+                    </td>
+
+                    <td>
+    <button
+        type="button"
+        class="btn btn-primary btn-sm view-application"
+        data-id="${Number(app.id)}">
+        View
+    </button>
+
+    ${
+        certificateGenerated
+        ? `
+            <a href="${certificateDownloadUrl}${encodeURIComponent(app.verification_id)}"
+               class="btn btn-primary btn-sm"
+               style="margin-top:5px;display:inline-block;">
+                Download Certificate
+            </a>
+          `
+        : canGenerateCertificate
+        ? `
+            <a href="${certificateGenerateUrl}${encodeURIComponent(app.verification_id)}"
+               class="btn btn-primary btn-sm"
+               style="margin-top:5px;display:inline-block;">
+                Generate Certificate
+            </a>
+          `
+        : ''
+    }
+</td>
+
+                </tr>
+            `;
+        }).join('');
 
     } catch (error) {
 
         table.innerHTML = `
             <tr>
-                <td colspan="6" style="text-align:center;color:#b91c1c;">
+                <td colspan="7" style="text-align:center;color:#b91c1c;">
                     Failed to load applications.
                 </td>
             </tr>
         `;
 
         message.textContent = error.message;
-
     }
-
 }
+document.getElementById('applications-table')
+    .addEventListener('click', async function(event) {
+
+        const button = event.target.closest('.save-evaluator');
+
+        if (!button) {
+            return;
+        }
+
+        const applicationId = button.dataset.id;
+
+        const dropdown = document.querySelector(
+            `.evaluator-select[data-id="${applicationId}"]`
+        );
+
+        const evaluatorName = dropdown.value;
+
+        if (!evaluatorName) {
+            alert('Please select a team member first.');
+            return;
+        }
+
+        button.disabled = true;
+        button.textContent = 'Saving...';
+
+        try {
+
+            const response = await fetch(
+                <?= json_encode(base_url('api/admin/assign-evaluator')) ?>,
+                {
+                    method: 'POST',
+                    credentials: 'same-origin',
+                    headers: {
+                        'Content-Type': 'application/x-www-form-urlencoded',
+                        'Accept': 'application/json'
+                    },
+                    body: new URLSearchParams({
+                        application_id: applicationId,
+                        evaluator_name: evaluatorName
+                    })
+                }
+            );
+
+            const data = await response.json();
+
+            if (!response.ok || !data.status) {
+                throw new Error(data.message || 'Assignment failed.');
+            }
+
+            alert(data.message);
+
+            await loadApplications();
+
+        } catch (error) {
+
+            alert(error.message);
+
+            button.disabled = false;
+            button.textContent = 'Save Assignment';
+
+        }
+
+    });
 
 
 // ===============================
@@ -563,8 +741,85 @@ document.getElementById('applications-table').addEventListener('click', function
 // ===============================
 // LOAD EVALUATION DETAILS
 // ===============================
+// ===============================
+// OPEN APPLICATION
+// ===============================
 
 async function openReview(applicationId) {
+
+    currentReviewApplicationId = Number(applicationId);
+
+    const modal = document.getElementById('review-modal');
+    const loading = document.getElementById('review-loading');
+
+    modal.classList.add('active');
+
+    loading.style.display = 'block';
+    loading.textContent = 'Loading application details...';
+
+    document.getElementById('review-content').style.display = 'none';
+    document.getElementById('scoring-content').style.display = 'none';
+
+    try {
+
+        const response = await fetch(adminApplicationsUrl, {
+            method: 'GET',
+            credentials: 'same-origin',
+            headers: {
+                'Accept': 'application/json'
+            }
+        });
+
+        const data = await response.json();
+
+        if (!response.ok || !data.status) {
+            throw new Error(data.message || 'Unable to load application.');
+        }
+
+        const application = (data.applications || []).find(
+            item => Number(item.id) === Number(applicationId)
+        );
+
+        if (!application) {
+            throw new Error('Application not found.');
+        }
+
+        // Already evaluated application
+        if (
+            application.evaluation_status !== null &&
+            application.evaluation_status !== undefined &&
+            String(application.evaluation_status).trim() !== ''
+        ) {
+
+            await loadExistingReview(applicationId);
+            return;
+
+        }
+
+        // Paid application without evaluation
+        if (
+            String(application.payment_status || '').toLowerCase() === 'paid'
+        ) {
+
+            await loadScoringForm(application);
+            return;
+
+        }
+
+        // Payment pending
+        loading.textContent =
+            'Payment Pending. Evaluation can start only after successful payment.';
+
+    } catch (error) {
+
+        loading.style.display = 'block';
+        loading.textContent = error.message;
+
+    }
+
+}
+
+async function loadExistingReview(applicationId) {
 
     currentReviewApplicationId = Number(applicationId);
 
@@ -576,6 +831,7 @@ async function openReview(applicationId) {
         'Loading evaluation details...';
 
     document.getElementById('review-content').style.display = 'none';
+    document.getElementById('scoring-content').style.display = 'none';
 
     document.getElementById('review-company').textContent = 'Loading...';
 
@@ -739,6 +995,272 @@ async function openReview(applicationId) {
 
         document.getElementById('review-company').textContent =
             'Evaluation Details';
+
+    }
+
+}
+// ===============================
+// LOAD ADMIN SCORING FORM
+// ===============================
+
+async function loadScoringForm(application) {
+
+    const loading = document.getElementById('review-loading');
+
+    loading.style.display = 'block';
+    loading.textContent = 'Loading scoring parameters...';
+
+    document.getElementById('review-content').style.display = 'none';
+    document.getElementById('scoring-content').style.display = 'none';
+
+    try {
+
+        const response = await fetch(
+            scoringParametersUrl + application.id,
+            {
+                method: 'GET',
+                credentials: 'same-origin',
+                headers: {
+                    'Accept': 'application/json'
+                }
+            }
+        );
+
+        const data = await response.json();
+
+        if (!response.ok || !data.status) {
+            throw new Error(data.message || 'Unable to load scoring parameters.');
+        }
+
+        currentScoringParameters = data.parameters || [];
+
+        if (currentScoringParameters.length !== 9) {
+            throw new Error('Expected 9 active evaluation parameters.');
+        }
+
+        document.getElementById('scoring-app-number').textContent =
+            application.application_number || 'N/A';
+
+        document.getElementById('scoring-company').textContent =
+            application.company_name || 'N/A';
+
+        document.getElementById('scoring-payment').textContent =
+            application.payment_status || 'N/A';
+
+        document.getElementById('scoring-comments').value = '';
+
+        document.getElementById('scoring-message').textContent = '';
+
+        document.getElementById('submit-scoring-button').disabled = false;
+
+        const container = document.getElementById('scoring-parameters');
+
+        container.innerHTML = currentScoringParameters.map(parameter => `
+
+            <div style="
+                background:#ffffff;
+                border:1px solid #e2e8f0;
+                border-radius:10px;
+                padding:15px;
+                margin-bottom:12px;
+            ">
+
+                <div style="
+                    display:flex;
+                    justify-content:space-between;
+                    align-items:center;
+                    gap:15px;
+                    margin-bottom:10px;
+                ">
+
+                    <strong>${escapeHtml(parameter.parameter_name)}</strong>
+
+                    <span style="color:#64748b;">
+                        Weight: ${escapeHtml(parameter.weight)}%
+                    </span>
+
+                </div>
+
+                <label style="display:block;margin-bottom:6px;">
+                    Score (0–10)
+                </label>
+
+                <input
+                    type="number"
+                    class="form-control scoring-input"
+                    data-parameter-id="${Number(parameter.id)}"
+                    data-weight="${Number(parameter.weight)}"
+                    min="0"
+                    max="10"
+                    step="0.1"
+                    placeholder="Enter score between 0 and 10"
+                    oninput="calculateScoringTotal()"
+                >
+
+            </div>
+
+        `).join('');
+
+        calculateScoringTotal();
+
+        loading.style.display = 'none';
+
+        document.getElementById('scoring-content').style.display = 'block';
+
+    } catch (error) {
+
+        loading.style.display = 'block';
+        loading.textContent = error.message;
+
+    }
+
+}
+
+
+// ===============================
+// CALCULATE WEIGHTED TRUST SCORE
+// ===============================
+
+function calculateScoringTotal() {
+
+    const inputs = document.querySelectorAll('.scoring-input');
+
+    let total = 0;
+
+    inputs.forEach(input => {
+
+        const score = Number(input.value || 0);
+        const weight = Number(input.dataset.weight || 0);
+
+        total += (score / 10) * weight;
+
+    });
+
+    document.getElementById('calculated-total').textContent =
+        total.toFixed(2);
+
+    return total;
+
+}
+
+
+// ===============================
+// SUBMIT ADMIN EVALUATION
+// ===============================
+
+async function submitScoring() {
+
+    if (!currentReviewApplicationId || scoringInProgress) {
+        return;
+    }
+
+    const inputs = document.querySelectorAll('.scoring-input');
+
+    const scores = [];
+
+    for (const input of inputs) {
+
+        const value = input.value.trim();
+
+        if (value === '') {
+
+            alert('Please enter scores for all 9 parameters.');
+            input.focus();
+            return;
+
+        }
+
+        const score = Number(value);
+
+        if (!Number.isFinite(score) || score < 0 || score > 10) {
+
+            alert('Every score must be between 0 and 10.');
+            input.focus();
+            return;
+
+        }
+
+        scores.push({
+
+            parameter_id: Number(input.dataset.parameterId),
+
+            score: score
+
+        });
+
+    }
+
+    if (scores.length !== 9) {
+
+        alert('Exactly 9 parameter scores are required.');
+        return;
+
+    }
+
+    const button = document.getElementById('submit-scoring-button');
+
+    const message = document.getElementById('scoring-message');
+
+    scoringInProgress = true;
+
+    button.disabled = true;
+    button.textContent = 'Submitting...';
+
+    message.textContent = '';
+
+    try {
+
+        const response = await fetch(scoringSubmitUrl, {
+
+            method: 'POST',
+
+            credentials: 'same-origin',
+
+            headers: {
+                'Content-Type': 'application/json',
+                'Accept': 'application/json'
+            },
+
+            body: JSON.stringify({
+
+                application_id: currentReviewApplicationId,
+
+                scores: scores,
+
+                comments: document.getElementById('scoring-comments').value.trim()
+
+            })
+
+        });
+
+        const data = await response.json();
+
+        if (!response.ok || !data.status) {
+
+            throw new Error(data.message || 'Evaluation submission failed.');
+
+        }
+
+        message.style.color = 'green';
+        message.textContent = 'Evaluation submitted successfully!';
+
+        await loadApplications();
+
+        const submittedApplicationId = currentReviewApplicationId;
+
+        scoringInProgress = false;
+
+        await openReview(submittedApplicationId);
+
+    } catch (error) {
+
+        message.style.color = 'red';
+        message.textContent = error.message;
+
+        button.disabled = false;
+        button.textContent = 'Submit Evaluation';
+
+        scoringInProgress = false;
 
     }
 

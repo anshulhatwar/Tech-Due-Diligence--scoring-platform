@@ -9,7 +9,7 @@ class PaymentController extends Controller
 {
     private $keyId;
     private $keySecret;
-    private $amount = 100; // ₹1 = 100 paise
+    private $amount = 499900; // ₹4999 = 499900 paise
 
     public function __construct()
     {
@@ -106,7 +106,7 @@ class PaymentController extends Controller
                 ->where('id', $applicationId)
                 ->update([
                     'razorpay_order_id' => $order['id'],
-                    'payment_amount' => 1.00,
+                    'payment_amount' => 4999.00,
                     'payment_currency' => 'INR',
                     'payment_status' => 'Pending'
                 ]);

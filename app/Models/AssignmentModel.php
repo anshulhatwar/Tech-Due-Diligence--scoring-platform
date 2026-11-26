@@ -13,6 +13,7 @@ class AssignmentModel extends Model
     protected $allowedFields = [
         'application_id',
         'evaluator_id',
+        'assigned_evaluator_name',
         'assigned_by',
         'status',
         'assigned_at'

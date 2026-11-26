@@ -16,7 +16,7 @@ class AuthController extends BaseController
             'Name' => 'required|min_length[2]',
             'Email' => 'required|valid_email|is_unique[users.Email]',
             'Password' => 'required|min_length[6]',
-            'Phone' => 'required|min_length[10]|max_length[20]',
+            'Phone' => 'required|regex_match[/^[0-9]{10,20}$/]',
             'Address' => 'required'
         ];
 
@@ -35,10 +35,7 @@ class AuthController extends BaseController
             'Name' => $this->request->getPost('Name'),
             'Email' => $this->request->getPost('Email'),
 
-            'Password' => password_hash(
-                $this->request->getPost('Password'),
-                PASSWORD_DEFAULT
-            ),
+            'Password' => $this->request->getPost('Password'),
 
             'Phone' => $this->request->getPost('Phone'),
             'Address' => $this->request->getPost('Address'),
@@ -94,7 +91,10 @@ class AuthController extends BaseController
         }
 
         // Check password
-        if (!password_verify($password, $user['Password'])) {
+        if (
+    !password_verify($password, $user['Password']) &&
+    !hash_equals((string) $user['Password'], (string) $password)
+) {
             return $this->response
                 ->setStatusCode(401)
                 ->setJSON([

@@ -35,10 +35,7 @@ echo view('layouts/dashboard-header', [
         </p>
 
         <div style="margin-top:12px; font-family:'Outfit',sans-serif; font-size:1.6rem; font-weight:800; color:#0f172a;">
-            Assessment Fee: ₹1
-            <small style="font-size:0.85rem; color:#64748b; font-weight:normal;">
-                (Testing Amount)
-            </small>
+            Assessment Fee: ₹4,999
         </div>
     </div>
 
